@@ -1,0 +1,113 @@
+<svg width="800" height="420" viewBox="0 0 800 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bodyGrad" x1="120" y1="180" x2="680" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="35%" stop-color="#1D4ED8" />
+      <stop offset="70%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="roofGrad" x1="280" y1="120" x2="520" y2="210" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="windshieldGrad" x1="320" y1="140" x2="480" y2="210" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#93C5FD" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#1E3A8A" stop-opacity="0.95" />
+    </linearGradient>
+    <linearGradient id="wheelRim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="50%" stop-color="#64748B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <radialGradient id="headlightGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0" />
+    </radialGradient>
+    <filter id="shadowBlur" x="80" y="300" width="640" height="80" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="16" />
+    </filter>
+  </defs>
+
+  <!-- Car Contact Shadow on Ground -->
+  <ellipse cx="400" cy="340" rx="300" ry="24" fill="#000000" fill-opacity="0.35" filter="url(#shadowBlur)" />
+  <ellipse cx="400" cy="342" rx="220" ry="14" fill="#000000" fill-opacity="0.55" />
+
+  <!-- Car Silhouette / Bodywork -->
+  <!-- Main Chassis -->
+  <path d="M 120 280 
+           C 130 250, 160 230, 220 220 
+           C 280 200, 310 145, 360 135 
+           C 420 120, 520 125, 570 165 
+           C 620 205, 660 225, 710 245 
+           C 740 258, 750 275, 745 295 
+           C 740 315, 700 325, 660 325 
+           C 650 300, 620 275, 570 275 
+           C 520 275, 490 305, 480 325 
+           L 320 325 
+           C 310 305, 280 275, 230 275 
+           C 180 275, 150 300, 140 325 
+           C 120 325, 110 305, 120 280 Z" 
+        fill="url(#bodyGrad)" />
+
+  <!-- Cabin / Greenhouse / Roofline -->
+  <path d="M 285 218 
+           C 320 160, 355 140, 420 135 
+           C 485 130, 530 145, 560 185 
+           C 570 200, 575 215, 565 218 
+           Z" 
+        fill="url(#roofGrad)" />
+
+  <!-- Windshield and Windows -->
+  <path d="M 320 215 
+           C 345 168, 370 148, 415 144 
+           C 460 140, 500 152, 530 185 
+           C 540 198, 545 212, 535 215 
+           Z" 
+        fill="url(#windshieldGrad)" opacity="0.9" />
+
+  <!-- Window Pillars / Frame -->
+  <line x1="420" y1="138" x2="430" y2="215" stroke="#1E293B" stroke-width="5" />
+
+  <!-- Character lines & Aerodynamic vents -->
+  <path d="M 220 230 Q 380 245 660 260" stroke="#60A5FA" stroke-width="2.5" stroke-linecap="round" opacity="0.6" />
+  <path d="M 180 260 Q 320 270 480 275" stroke="#93C5FD" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+  <path d="M 540 235 L 680 255" stroke="#1D4ED8" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Front Headlight Projector -->
+  <polygon points="685,250 735,260 725,272 680,265" fill="#E0F2FE" />
+  <ellipse cx="715" cy="262" rx="35" ry="18" fill="url(#headlightGlow)" />
+
+  <!-- Rear Taillight Strip -->
+  <path d="M 125 272 Q 145 272 165 268" stroke="#EF4444" stroke-width="5" stroke-linecap="round" />
+
+  <!-- Front Wheel / Rim -->
+  <g>
+    <circle cx="585" cy="320" r="46" fill="#0F172A" />
+    <circle cx="585" cy="320" r="36" fill="url(#wheelRim)" />
+    <circle cx="585" cy="320" r="28" fill="#1E293B" />
+    <!-- Spokes -->
+    <line x1="585" y1="284" x2="585" y2="356" stroke="#E2E8F0" stroke-width="3.5" />
+    <line x1="549" y1="320" x2="621" y2="320" stroke="#E2E8F0" stroke-width="3.5" />
+    <line x1="560" y1="295" x2="610" y2="345" stroke="#E2E8F0" stroke-width="3.5" />
+    <line x1="610" y1="295" x2="560" y2="345" stroke="#E2E8F0" stroke-width="3.5" />
+    <!-- Center cap & brake caliper -->
+    <rect x="566" y="295" width="10" height="18" rx="2" fill="#2563EB" />
+    <circle cx="585" cy="320" r="10" fill="#0F172A" stroke="#3B82F6" stroke-width="2" />
+  </g>
+
+  <!-- Rear Wheel / Rim -->
+  <g>
+    <circle cx="215" cy="320" r="46" fill="#0F172A" />
+    <circle cx="215" cy="320" r="36" fill="url(#wheelRim)" />
+    <circle cx="215" cy="320" r="28" fill="#1E293B" />
+    <!-- Spokes -->
+    <line x1="215" y1="284" x2="215" y2="356" stroke="#E2E8F0" stroke-width="3.5" />
+    <line x1="179" y1="320" x2="251" y2="320" stroke="#E2E8F0" stroke-width="3.5" />
+    <line x1="190" y1="295" x2="240" y2="345" stroke="#E2E8F0" stroke-width="3.5" />
+    <line x1="240" y1="295" x2="190" y2="345" stroke="#E2E8F0" stroke-width="3.5" />
+    <!-- Center cap & brake caliper -->
+    <rect x="196" y="295" width="10" height="18" rx="2" fill="#2563EB" />
+    <circle cx="215" cy="320" r="10" fill="#0F172A" stroke="#3B82F6" stroke-width="2" />
+  </g>
+</svg>

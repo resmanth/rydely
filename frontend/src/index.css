@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+  --color-primary: #dc2626;
+  --color-accent: #ff3535;
+  --color-accent-dim: #b32424;
+  --color-bg-dark: #070404;
+  --color-bg-stage: #140808;
+  --color-card-border: #2a1010;
+  --color-subtext: #8a8f98;
+}
+
+body {
+  background-color: #070404;
+  background-image: 
+    radial-gradient(ellipse at 12% 18%, rgba(120, 20, 20, 0.35) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 85%, rgba(95, 15, 15, 0.3) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 55%, rgba(60, 8, 8, 0.25) 0%, transparent 60%);
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}

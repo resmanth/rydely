@@ -1,13 +1,17 @@
-import { useSearchParams, Link } from 'react-router-dom';
+
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import CarCard from '../components/CarCard';
+
 import xuvImg from '../assets/cars/bmw-offer.png';
 import safariImg from '../assets/cars/toyota-offer-2.png';
+import innovaImg from '../assets/cars/toyota-offer.png';
+import tharImg from '../assets/cars/nissan-offer.png';
+import mercedesImg from '../assets/cars/mercedes-offer.png';
 
-/**
- * Cars.jsx — Basic placeholder page for Rent a Car / Find Car
- * Member 2 will implement the live fleet catalog and dynamic filters here.
- * Member 1 provides the reusable CarCard component and captures search params passed from Hero.
- */
+// Temporary catalogue data.
+// We will replace this with the backend API once Members 3 and 4
+// provide the vehicle endpoints.
 const sampleCars = [
   {
     id: 'car-1',
@@ -15,20 +19,21 @@ const sampleCars = [
     category: 'SUV',
     image: xuvImg,
     price: 3499,
-    priceUnit: '/ day',
     location: 'Mumbai · Bandra & BKC',
     rating: 4.96,
     tripsCount: 38,
     hostName: 'Aarav Sharma',
     isSuperhost: true,
     badge: 'POPULAR SUV',
+    instantBooking: true,
+    doorstepDelivery: true,
     specs: [
       { label: 'Transmission', val: 'Automatic' },
       { label: 'Fuel', val: 'Diesel Turbo' },
       { label: 'Seats', val: '7 Seater' },
       { label: 'Free KMs', val: '300 km/day' },
     ],
-    features: ['Panoramic Sunroof', 'FASTag Preloaded', 'Doorstep Delivery', 'Level-2 ADAS'],
+    features: ['Panoramic Sunroof', 'FASTag Preloaded', 'Doorstep Delivery'],
   },
   {
     id: 'car-2',
@@ -36,112 +41,433 @@ const sampleCars = [
     category: 'SUV',
     image: safariImg,
     price: 3299,
-    priceUnit: '/ day',
     location: 'Delhi NCR · Cyber City',
     rating: 4.98,
     tripsCount: 52,
     hostName: 'Rohan Deshmukh',
     isSuperhost: true,
     badge: 'TOP RATED',
+    instantBooking: false,
+    doorstepDelivery: true,
     specs: [
       { label: 'Transmission', val: 'Automatic' },
       { label: 'Fuel', val: '2.0L Diesel' },
-      { label: 'Seats', val: '7 Captain Seats' },
+      { label: 'Seats', val: '7 Seater' },
       { label: 'Free KMs', val: '250 km/day' },
     ],
-    features: ['Ventilated Seats', 'JBL 9-Speaker Audio', 'FASTag', 'Doorstep Delivery'],
+    features: ['Ventilated Seats', 'JBL Audio', 'Doorstep Delivery'],
+  },
+  {
+    id: 'car-3',
+    name: 'Toyota Innova Hycross ZX',
+    category: 'MPV',
+    image: innovaImg,
+    price: 3899,
+    location: 'Bengaluru · Indiranagar',
+    rating: 5.0,
+    tripsCount: 64,
+    hostName: 'Priya Menon',
+    isSuperhost: true,
+    badge: 'FAMILY FAVOURITE',
+    instantBooking: true,
+    doorstepDelivery: true,
+    specs: [
+      { label: 'Transmission', val: 'e-CVT Hybrid' },
+      { label: 'Fuel', val: 'Hybrid' },
+      { label: 'Seats', val: '7 Seater' },
+      { label: 'Free KMs', val: 'Unlimited' },
+    ],
+    features: ['Ottoman Seats', 'Hybrid Engine', 'Doorstep Delivery'],
+  },
+  {
+    id: 'car-4',
+    name: 'Mahindra Thar Earth 4x4',
+    category: '4x4',
+    image: tharImg,
+    price: 3199,
+    location: 'Goa · Panaji',
+    rating: 4.95,
+    tripsCount: 41,
+    hostName: 'Kabir Singh',
+    isSuperhost: false,
+    badge: 'ADVENTURE PICK',
+    instantBooking: true,
+    doorstepDelivery: false,
+    specs: [
+      { label: 'Transmission', val: 'Manual' },
+      { label: 'Drivetrain', val: '4x4' },
+      { label: 'Seats', val: '4 Seater' },
+      { label: 'Free KMs', val: '350 km/day' },
+    ],
+    features: ['4x4 Drive', 'Convertible Top', 'Off-road Ready'],
+  },
+  {
+    id: 'car-5',
+    name: 'Mercedes-Benz C-Class',
+    category: 'Luxury',
+    image: mercedesImg,
+    price: 5999,
+    location: 'Mumbai · South Mumbai',
+    rating: 4.92,
+    tripsCount: 27,
+    hostName: 'Neha Kapoor',
+    isSuperhost: true,
+    badge: 'LUXURY DRIVE',
+    instantBooking: true,
+    doorstepDelivery: true,
+    specs: [
+      { label: 'Transmission', val: 'Automatic' },
+      { label: 'Fuel', val: 'Petrol' },
+      { label: 'Seats', val: '5 Seater' },
+      { label: 'Free KMs', val: '200 km/day' },
+    ],
+    features: ['Premium Interior', 'Sunroof', 'Doorstep Delivery'],
   },
 ];
 
 const Cars = () => {
   const [searchParams] = useSearchParams();
-  const city = searchParams.get('city') || '';
+
+  // Read the search information passed from the homepage.
+  const urlCity = searchParams.get('city') || '';
+  const urlCategory = searchParams.get('category') || 'all';
   const pickupDate = searchParams.get('pickupDate') || '';
   const pickupTime = searchParams.get('pickupTime') || '';
   const returnDate = searchParams.get('returnDate') || '';
   const returnTime = searchParams.get('returnTime') || '';
-  const category = searchParams.get('category') || '';
-  const delivery = searchParams.get('delivery');
+  const deliveryRequested = searchParams.get('delivery') === 'true';
 
-  const hasSearchParams = Boolean(city || pickupDate || category);
+  // Featured vehicle links use ?car=vehicle-name.
+  const featuredCar =
+    searchParams.get('car') ||
+    searchParams.get('carName') ||
+    '';
+
+  const featuredCarId = searchParams.get('carId') || '';
+
+  // Local filter state.
+  const [city, setCity] = useState(urlCity);
+  const [category, setCategory] = useState(urlCategory.toLowerCase());
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sortBy, setSortBy] = useState('recommended');
+  const [instantOnly, setInstantOnly] = useState(
+    urlCategory.toLowerCase() === 'instant'
+  );
+  const [deliveryOnly, setDeliveryOnly] = useState(deliveryRequested);
+
+  // Keep the filter state in sync if the URL changes.
+  useEffect(() => {
+    setCity(urlCity);
+    setCategory(urlCategory.toLowerCase());
+    setInstantOnly(urlCategory.toLowerCase() === 'instant');
+    setDeliveryOnly(deliveryRequested);
+  }, [urlCity, urlCategory, deliveryRequested]);
+
+  const filteredCars = useMemo(() => {
+    let result = [...sampleCars];
+
+    // City filter.
+    if (city.trim()) {
+      result = result.filter((car) =>
+        car.location.toLowerCase().includes(city.trim().toLowerCase())
+      );
+    }
+
+    // Vehicle category filter.
+    if (category !== 'all' && category !== 'instant') {
+      result = result.filter(
+        (car) => car.category.toLowerCase() === category
+      );
+    }
+
+    // Instant booking filter.
+    if (category === 'instant' || instantOnly) {
+      result = result.filter((car) => car.instantBooking);
+    }
+
+    // Price filters.
+    if (minPrice !== '') {
+      result = result.filter((car) => car.price >= Number(minPrice));
+    }
+
+    if (maxPrice !== '') {
+      result = result.filter((car) => car.price <= Number(maxPrice));
+    }
+
+    // Doorstep delivery filter.
+    if (deliveryOnly) {
+      result = result.filter((car) => car.doorstepDelivery);
+    }
+
+    // Featured car selection.
+    if (featuredCarId) {
+      result = result.filter((car) => car.id === featuredCarId);
+    } else if (featuredCar) {
+      result = result.filter((car) =>
+        car.name.toLowerCase().includes(featuredCar.toLowerCase())
+      );
+    }
+
+    // Sorting.
+    if (sortBy === 'price-low') {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'price-high') {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortBy === 'rating') {
+      result.sort((a, b) => b.rating - a.rating);
+    }
+
+    return result;
+  }, [
+    city,
+    category,
+    minPrice,
+    maxPrice,
+    sortBy,
+    instantOnly,
+    deliveryOnly,
+    featuredCar,
+    featuredCarId,
+  ]);
+
+  const clearFilters = () => {
+    setCity('');
+    setCategory('all');
+    setMinPrice('');
+    setMaxPrice('');
+    setSortBy('recommended');
+    setInstantOnly(false);
+    setDeliveryOnly(false);
+  };
+
+  const hasActiveFilters =
+    city.trim() !== '' ||
+    category !== 'all' ||
+    minPrice !== '' ||
+    maxPrice !== '' ||
+    instantOnly ||
+    deliveryOnly ||
+    featuredCar !== '' ||
+    featuredCarId !== '';
 
   return (
     <div className="min-h-screen bg-[#070404] text-white font-['Outfit'] pt-24 sm:pt-28 pb-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* ── Page Header ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Page heading */}
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs font-mono font-bold tracking-widest uppercase text-red-400 bg-red-950/60 border border-red-500/30 px-3.5 py-1 rounded-full">
             VEHICLE FLEET · FIND & RENT
           </span>
+
           <h1 className="text-3xl sm:text-5xl font-black text-white mt-4 mb-3 tracking-tight">
-            Rent a Car · Find Cars
+            Find Your Perfect Drive
           </h1>
+
           <p className="text-sm sm:text-base text-slate-400">
-            Browse verified self-drive cars available from local hosts.
+            Explore verified self-drive cars and find the right ride for your journey.
           </p>
         </div>
 
-        {/* ── Search Baton Passing Telemetry Banner ── */}
-        {hasSearchParams && (
-          <div className="mb-10 p-4 sm:p-5 rounded-2xl bg-zinc-950/80 border border-red-500/30 shadow-lg shadow-red-950/30 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs font-mono text-red-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>SEARCH CRITERIA RECEIVED:</span>
+        {/* Search and filter panel */}
+        <section className="mb-10 p-5 sm:p-6 rounded-3xl bg-zinc-950/80 border border-zinc-800 shadow-xl">
+          <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+
+            {/* City search */}
+            <div className="flex-1">
+              <label htmlFor="city-search" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                Pickup city
+              </label>
+              <input
+                id="city-search"
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Try Mumbai, Delhi NCR..."
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-red-500"
+              />
             </div>
-            <div className="flex items-center gap-3 flex-wrap text-xs font-semibold text-slate-300">
-              {city && (
-                <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-lg">
-                  📍 City: <span className="text-white font-bold">{city}</span>
-                </span>
-              )}
-              {pickupDate && (
-                <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-lg">
-                  🗓️ Trip: <span className="text-white font-bold">{pickupDate} {pickupTime}</span> → <span className="text-white font-bold">{returnDate} {returnTime}</span>
-                </span>
-              )}
-              {category && category !== 'all' && (
-                <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-lg">
-                  🚘 Type: <span className="text-white font-bold uppercase">{category}</span>
-                </span>
-              )}
-              {delivery === 'true' && (
-                <span className="bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 px-3 py-1 rounded-lg">
-                  ⚡ Doorstep Delivery
-                </span>
-              )}
+
+            {/* Category */}
+            <div className="flex-1">
+              <label htmlFor="category-filter" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                Vehicle type
+              </label>
+              <select
+                id="category-filter"
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setInstantOnly(e.target.value === 'instant');
+                }}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-red-500"
+              >
+                <option value="all">All vehicles</option>
+                <option value="suv">SUV</option>
+                <option value="mpv">MPV</option>
+                <option value="4x4">4x4</option>
+                <option value="luxury">Luxury</option>
+                <option value="instant">Instant booking</option>
+              </select>
             </div>
-            <Link
-              to="/cars"
-              className="text-xs text-red-400 hover:text-red-300 underline font-medium"
+
+            {/* Sort */}
+            <div className="flex-1">
+              <label htmlFor="sort-filter" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                Sort by
+              </label>
+              <select
+                id="sort-filter"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-red-500"
+              >
+                <option value="recommended">Recommended</option>
+                <option value="price-low">Price: Low to high</option>
+                <option value="price-high">Price: High to low</option>
+                <option value="rating">Highest rated</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Price and additional filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 pt-5 border-t border-zinc-800">
+
+            <div>
+              <label htmlFor="min-price" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                Minimum price (₹/day)
+              </label>
+              <input
+                id="min-price"
+                type="number"
+                min="0"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                placeholder="No minimum"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-red-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="max-price" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                Maximum price (₹/day)
+              </label>
+              <input
+                id="max-price"
+                type="number"
+                min="0"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="No maximum"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-red-500"
+              />
+            </div>
+
+            <label className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={instantOnly}
+                onChange={(e) => setInstantOnly(e.target.checked)}
+                className="accent-red-500 w-4 h-4"
+              />
+              <span className="text-sm text-slate-300">Instant booking only</span>
+            </label>
+
+            <label className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={deliveryOnly}
+                onChange={(e) => setDeliveryOnly(e.target.checked)}
+                className="accent-red-500 w-4 h-4"
+              />
+              <span className="text-sm text-slate-300">Doorstep delivery</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end mt-4">
+            <button
+              type="button"
+              onClick={clearFilters}
+              disabled={!hasActiveFilters}
+              className="text-sm font-semibold text-red-400 hover:text-red-300 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
             >
-              Clear
-            </Link>
+              Clear all filters
+            </button>
+          </div>
+        </section>
+
+        {/* Search dates received from homepage */}
+        {(pickupDate || returnDate || featuredCar) && (
+          <div className="mb-8 p-4 rounded-2xl bg-red-950/20 border border-red-500/20 flex flex-wrap items-center gap-3 text-xs text-slate-300">
+            {featuredCar && (
+              <span>
+                Selected car: <strong className="text-white">{featuredCar}</strong>
+              </span>
+            )}
+
+            {pickupDate && (
+              <span>
+                Pickup: <strong className="text-white">{pickupDate} {pickupTime}</strong>
+              </span>
+            )}
+
+            {returnDate && (
+              <span>
+                Return: <strong className="text-white">{returnDate} {returnTime}</strong>
+              </span>
+            )}
+
+            <span className="text-slate-500">
+              Dates are carried from your search; live availability will be connected to the backend.
+            </span>
           </div>
         )}
 
-        {/* ── Hand-off Notice for Member 2 ── */}
-        <div className="mb-10 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        {/* Results heading */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <span className="text-slate-300 font-bold">Team Hand-off:</span> Fleet catalog and live database filters will be mapped by Member 2. Reusable UI building block <code className="text-red-400 font-mono">CarCard.jsx</code> is integrated below.
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Available vehicles
+            </h2>
+            <p className="text-sm text-slate-400 mt-1">
+              {filteredCars.length} {filteredCars.length === 1 ? 'vehicle' : 'vehicles'} found
+            </p>
           </div>
-          <Link to="/" className="text-red-400 hover:text-red-300 font-semibold inline-flex items-center gap-1 shrink-0">
+
+          <Link
+            to="/"
+            className="text-sm text-red-400 hover:text-red-300 font-semibold"
+          >
             ← Back to Home
           </Link>
         </div>
 
-        {/* ── Sample Cars Grid Using Reusable CarCard Component ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
-          {sampleCars.map((car) => (
-            <CarCard
-              key={car.id}
-              {...car}
-              onBookNow={(booking) => {
-                alert(`Booking initiated for ${booking.name} at ${booking.price}/day!`);
-              }}
-            />
-          ))}
-        </div>
+        {/* Car results */}
+        {filteredCars.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredCars.map((car) => (
+              <CarCard key={car.id} {...car} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 px-5 rounded-3xl bg-zinc-950/70 border border-zinc-800">
+            <div className="text-4xl mb-4">🚘</div>
+            <h3 className="text-xl font-bold text-white mb-2">
+              No cars found
+            </h3>
+            <p className="text-sm text-slate-400 max-w-md mx-auto mb-6">
+              Try changing your city, vehicle type or price range to see more available cars.
+            </p>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+            >
+              Reset filters
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

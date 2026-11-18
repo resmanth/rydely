@@ -1,3 +1,4 @@
+import CarDetails from './pages/CarDetails';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
@@ -32,6 +33,7 @@ const AppLayout = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cars" element={<Cars />} />
+          <Route path="/cars/:id" element={<CarDetails />} />
           <Route path="/vehicles" element={<Cars />} />
           <Route path="/find-car" element={<Cars />} />
           <Route path="/rent-a-car" element={<Cars />} />

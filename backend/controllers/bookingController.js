@@ -1,6 +1,6 @@
 
 import Car from "../models/Car.js";
-import { checkAvailability } from "../utils/checkAvailability.js";
+import checkAvailability from "../utils/checkAvailability.js";
 
 // API to check availability of cars for the given date and location
 export const checkAvailabilityOfCar = async (req, res) => {
@@ -64,7 +64,9 @@ export const createBooking = async (req, res) => {
         // Calculate price based on pickupDate and returnDate
         const picked = new Date(pickupDate);
         const returned = new Date(returnDate);
-        const noofDays = Math.ceil((returned - picked) / (1000 60 * 60 * 24))
+        const noofDays = Math.ceil(
+            (returned - picked) / (1000 * 60 * 60 * 24)
+        );
         const price = carData.pricePerDay * noofDays;
         await Booking.create({ car, owner: carData.owner, user: _id, pickupDate, returnDate, price })
         res.json({ success: true, message: "Booking Created" })

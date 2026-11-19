@@ -9,7 +9,7 @@ const checkAvailability = async (car, pickupDate, returnDate) => {
         returnDate: { $gte: pickupDate }
     });
 
-    return bookings.length === 0;
+    return bookings.length===0;
 };
 
 export default checkAvailability;

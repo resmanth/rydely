@@ -3,22 +3,45 @@ import { useNavigate } from 'react-router-dom';
 import bgVideo from '../assets/bg.mp4';
 import sunsetRoad from '../assets/sunset-road.jpg';
 
+const getDateOffset = (days) => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 const Hero = () => {
   const navigate = useNavigate();
 
   // Search Form State
   const [city, setCity] = useState('');
-  const [pickupDate, setPickupDate] = useState('2026-01-14');
+  const [pickupDate, setPickupDate] = useState(() => getDateOffset(1));
   const [pickupTime, setPickupTime] = useState('10:00');
-  const [returnDate, setReturnDate] = useState('2026-01-17');
+  const [returnDate, setReturnDate] = useState(() => getDateOffset(4));
   const [returnTime, setReturnTime] = useState('18:00');
   const [doorstepDelivery, setDoorstepDelivery] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all'); // 'all' | 'suv' | 'luxury' | 'instant'
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const searchCars = (searchCity = city) => {
+    const pickup = `${pickupDate}T${pickupTime}`;
+    const returning = `${returnDate}T${returnTime}`;
+
+    if (pickupDate < getDateOffset(0)) {
+      alert('Pickup date cannot be in the past.');
+      return;
+    }
+
+    if (returning <= pickup) {
+      alert('Return date and time must be after pickup.');
+      return;
+    }
+
     const query = new URLSearchParams({
-      city: city.trim(),
+      city: searchCity.trim(),
       pickupDate,
       pickupTime,
       returnDate,
@@ -26,7 +49,13 @@ const Hero = () => {
       delivery: String(doorstepDelivery),
       category: selectedCategory,
     }).toString();
+
     navigate(`/cars?${query}`);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    searchCars();
   };
 
   return (
@@ -179,8 +208,16 @@ const Hero = () => {
                   </svg>
                   <input
                     type="date"
+                    min={getDateOffset(0)}
                     value={pickupDate}
-                    onChange={(e) => setPickupDate(e.target.value)}
+                    onChange={(e) => {
+                      const nextDate = e.target.value;
+                      setPickupDate(nextDate);
+
+                      if (returnDate < nextDate) {
+                        setReturnDate(nextDate);
+                      }
+                    }}
                     className="bg-transparent text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none cursor-pointer"
                   />
                   <input
@@ -203,6 +240,7 @@ const Hero = () => {
                   </svg>
                   <input
                     type="date"
+                    min={pickupDate || getDateOffset(0)}
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
                     className="bg-transparent text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none cursor-pointer"
@@ -318,28 +356,28 @@ const Hero = () => {
             <span className="text-red-400 font-semibold">Popular Cities:</span>
             <button
               type="button"
-              onClick={() => { setCity('Mumbai'); navigate('/cars?city=Mumbai'); }}
+              onClick={() => { setCity('Mumbai'); searchCars('Mumbai'); }}
               className="hover:text-white bg-black/50 hover:bg-red-950/60 px-3 py-1 rounded-full border border-red-500/20 hover:border-red-500/40 transition-colors"
             >
               Mumbai (from ₹1,800/d)
             </button>
             <button
               type="button"
-              onClick={() => { setCity('Bengaluru'); navigate('/cars?city=Bengaluru'); }}
+              onClick={() => { setCity('Bengaluru'); searchCars('Bengaluru'); }}
               className="hover:text-white bg-black/50 hover:bg-red-950/60 px-3 py-1 rounded-full border border-red-500/20 hover:border-red-500/40 transition-colors"
             >
               Bengaluru (from ₹1,600/d)
             </button>
             <button
               type="button"
-              onClick={() => { setCity('Delhi NCR'); navigate('/cars?city=Delhi+NCR'); }}
+              onClick={() => { setCity('Delhi NCR'); searchCars('Delhi NCR'); }}
               className="hover:text-white bg-black/50 hover:bg-red-950/60 px-3 py-1 rounded-full border border-red-500/20 hover:border-red-500/40 transition-colors"
             >
               Delhi NCR (from ₹1,500/d)
             </button>
             <button
               type="button"
-              onClick={() => { setCity('Goa'); navigate('/cars?city=Goa'); }}
+              onClick={() => { setCity('Goa'); searchCars('Goa'); }}
               className="hover:text-white bg-black/50 hover:bg-red-950/60 px-3 py-1 rounded-full border border-red-500/20 hover:border-red-500/40 transition-colors"
             >
               Goa (from ₹2,200/d)

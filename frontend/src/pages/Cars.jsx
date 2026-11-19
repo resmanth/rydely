@@ -1,132 +1,10 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CarCard from '../components/CarCard';
-
-import xuvImg from '../assets/cars/bmw-offer.png';
-import safariImg from '../assets/cars/toyota-offer-2.png';
-import innovaImg from '../assets/cars/toyota-offer.png';
-import tharImg from '../assets/cars/nissan-offer.png';
-import mercedesImg from '../assets/cars/mercedes-offer.png';
-
-// Temporary catalogue data.
-// We will replace this with the backend API once Members 3 and 4
-// provide the vehicle endpoints.
-const sampleCars = [
-  {
-    id: 'car-1',
-    name: 'Mahindra XUV700 AX7L',
-    category: 'SUV',
-    image: xuvImg,
-    price: 3499,
-    location: 'Mumbai · Bandra & BKC',
-    rating: 4.96,
-    tripsCount: 38,
-    hostName: 'Aarav Sharma',
-    isSuperhost: true,
-    badge: 'POPULAR SUV',
-    instantBooking: true,
-    doorstepDelivery: true,
-    specs: [
-      { label: 'Transmission', val: 'Automatic' },
-      { label: 'Fuel', val: 'Diesel Turbo' },
-      { label: 'Seats', val: '7 Seater' },
-      { label: 'Free KMs', val: '300 km/day' },
-    ],
-    features: ['Panoramic Sunroof', 'FASTag Preloaded', 'Doorstep Delivery'],
-  },
-  {
-    id: 'car-2',
-    name: 'Tata Safari Dark Edition',
-    category: 'SUV',
-    image: safariImg,
-    price: 3299,
-    location: 'Delhi NCR · Cyber City',
-    rating: 4.98,
-    tripsCount: 52,
-    hostName: 'Rohan Deshmukh',
-    isSuperhost: true,
-    badge: 'TOP RATED',
-    instantBooking: false,
-    doorstepDelivery: true,
-    specs: [
-      { label: 'Transmission', val: 'Automatic' },
-      { label: 'Fuel', val: '2.0L Diesel' },
-      { label: 'Seats', val: '7 Seater' },
-      { label: 'Free KMs', val: '250 km/day' },
-    ],
-    features: ['Ventilated Seats', 'JBL Audio', 'Doorstep Delivery'],
-  },
-  {
-    id: 'car-3',
-    name: 'Toyota Innova Hycross ZX',
-    category: 'MPV',
-    image: innovaImg,
-    price: 3899,
-    location: 'Bengaluru · Indiranagar',
-    rating: 5.0,
-    tripsCount: 64,
-    hostName: 'Priya Menon',
-    isSuperhost: true,
-    badge: 'FAMILY FAVOURITE',
-    instantBooking: true,
-    doorstepDelivery: true,
-    specs: [
-      { label: 'Transmission', val: 'e-CVT Hybrid' },
-      { label: 'Fuel', val: 'Hybrid' },
-      { label: 'Seats', val: '7 Seater' },
-      { label: 'Free KMs', val: 'Unlimited' },
-    ],
-    features: ['Ottoman Seats', 'Hybrid Engine', 'Doorstep Delivery'],
-  },
-  {
-    id: 'car-4',
-    name: 'Mahindra Thar Earth 4x4',
-    category: '4x4',
-    image: tharImg,
-    price: 3199,
-    location: 'Goa · Panaji',
-    rating: 4.95,
-    tripsCount: 41,
-    hostName: 'Kabir Singh',
-    isSuperhost: false,
-    badge: 'ADVENTURE PICK',
-    instantBooking: true,
-    doorstepDelivery: false,
-    specs: [
-      { label: 'Transmission', val: 'Manual' },
-      { label: 'Drivetrain', val: '4x4' },
-      { label: 'Seats', val: '4 Seater' },
-      { label: 'Free KMs', val: '350 km/day' },
-    ],
-    features: ['4x4 Drive', 'Convertible Top', 'Off-road Ready'],
-  },
-  {
-    id: 'car-5',
-    name: 'Mercedes-Benz C-Class',
-    category: 'Luxury',
-    image: mercedesImg,
-    price: 5999,
-    location: 'Mumbai · South Mumbai',
-    rating: 4.92,
-    tripsCount: 27,
-    hostName: 'Neha Kapoor',
-    isSuperhost: true,
-    badge: 'LUXURY DRIVE',
-    instantBooking: true,
-    doorstepDelivery: true,
-    specs: [
-      { label: 'Transmission', val: 'Automatic' },
-      { label: 'Fuel', val: 'Petrol' },
-      { label: 'Seats', val: '5 Seater' },
-      { label: 'Free KMs', val: '200 km/day' },
-    ],
-    features: ['Premium Interior', 'Sunroof', 'Doorstep Delivery'],
-  },
-];
+import { sampleCars } from '../data/cars';
 
 const Cars = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Read the search information passed from the homepage.
   const urlCity = searchParams.get('city') || '';
@@ -136,6 +14,12 @@ const Cars = () => {
   const returnDate = searchParams.get('returnDate') || '';
   const returnTime = searchParams.get('returnTime') || '';
   const deliveryRequested = searchParams.get('delivery') === 'true';
+  const urlMinPrice = searchParams.get('minPrice') || '';
+  const urlMaxPrice = searchParams.get('maxPrice') || '';
+  const urlSortBy = searchParams.get('sortBy') || 'recommended';
+  const urlInstantOnly =
+    searchParams.get('instant') === 'true' ||
+    urlCategory.toLowerCase() === 'instant';
 
   // Featured vehicle links use ?car=vehicle-name.
   const featuredCar =
@@ -148,21 +32,43 @@ const Cars = () => {
   // Local filter state.
   const [city, setCity] = useState(urlCity);
   const [category, setCategory] = useState(urlCategory.toLowerCase());
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [sortBy, setSortBy] = useState('recommended');
-  const [instantOnly, setInstantOnly] = useState(
-    urlCategory.toLowerCase() === 'instant'
-  );
+  const [minPrice, setMinPrice] = useState(urlMinPrice);
+  const [maxPrice, setMaxPrice] = useState(urlMaxPrice);
+  const [sortBy, setSortBy] = useState(urlSortBy);
+  const [instantOnly, setInstantOnly] = useState(urlInstantOnly);
   const [deliveryOnly, setDeliveryOnly] = useState(deliveryRequested);
 
   // Keep the filter state in sync if the URL changes.
   useEffect(() => {
     setCity(urlCity);
     setCategory(urlCategory.toLowerCase());
-    setInstantOnly(urlCategory.toLowerCase() === 'instant');
+    setMinPrice(urlMinPrice);
+    setMaxPrice(urlMaxPrice);
+    setSortBy(urlSortBy);
+    setInstantOnly(urlInstantOnly);
     setDeliveryOnly(deliveryRequested);
-  }, [urlCity, urlCategory, deliveryRequested]);
+  }, [
+    urlCity,
+    urlCategory,
+    urlMinPrice,
+    urlMaxPrice,
+    urlSortBy,
+    urlInstantOnly,
+    deliveryRequested,
+  ]);
+
+  // Update one URL parameter without removing the others.
+  const updateSearchParam = (key, value, defaultValue = '') => {
+    setSearchParams((params) => {
+      if (value === defaultValue || value === '') {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+
+      return params;
+    }, { replace: true });
+  };
 
   const filteredCars = useMemo(() => {
     let result = [...sampleCars];
@@ -239,6 +145,19 @@ const Cars = () => {
     setSortBy('recommended');
     setInstantOnly(false);
     setDeliveryOnly(false);
+
+    setSearchParams((params) => {
+      [
+        'city',
+        'category',
+        'delivery',
+        'car',
+        'carName',
+        'carId',
+      ].forEach((key) => params.delete(key));
+
+      return params;
+    });
   };
 
   const hasActiveFilters =
@@ -368,7 +287,14 @@ const Cars = () => {
               <input
                 type="checkbox"
                 checked={instantOnly}
-                onChange={(e) => setInstantOnly(e.target.checked)}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setInstantOnly(checked);
+
+                  if (!checked && category === 'instant') {
+                    setCategory('all');
+                  }
+                }}
                 className="accent-red-500 w-4 h-4"
               />
               <span className="text-sm text-slate-300">Instant booking only</span>

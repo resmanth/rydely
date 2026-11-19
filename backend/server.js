@@ -24,7 +24,7 @@ app.get('/', (req, res)=>{
 app.use('/api/user' , userRouter)
 
 app.use('/api/owner' , ownerRouter)
-app.use('/api/owner',bookingRouter)
+app.use('/api/booking', bookingRouter)
 const PORT = process.env. PORT || 3000;
 
 

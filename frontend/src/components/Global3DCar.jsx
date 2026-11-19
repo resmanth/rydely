@@ -36,43 +36,43 @@ const Global3DCar = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.1;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 2000);
 
-    // ── Environment Map (Crucial for realistic PBR reflections & lustrous clearcoat) ──
+    // ── Environment Map (Soft ambient studio fill for rich Melbourne Red pigment) ──
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     const roomEnv = new RoomEnvironment();
     scene.environment = pmremGenerator.fromScene(roomEnv, 0.04).texture;
 
-    // ── High-End Automotive Studio Lighting (Crimson Atmosphere matching template) ──
-    const hemi = new THREE.HemisphereLight(0xf5e8e8, 0x241a1a, 1.8);
+    // ── High-End Automotive Studio Lighting (Matches reference car studio gradient) ──
+    const hemi = new THREE.HemisphereLight(0xfceeee, 0x200808, 1.4);
     scene.add(hemi);
 
-    // Front-Left Key Light
-    const key = new THREE.DirectionalLight(0xffffff, 3.2);
-    key.position.set(-8, 10, 8);
+    // Front-Left Key Light (Casts crisp highlight along shoulder line & hood contour)
+    const key = new THREE.DirectionalLight(0xfff5f5, 2.2);
+    key.position.set(-8, 9, 8);
     scene.add(key);
 
-    // Direct Overhead Studio Light (guarantees brilliant top-down illumination)
-    const topLight = new THREE.DirectionalLight(0xffffff, 3.0);
-    topLight.position.set(0, 16, 0);
+    // Direct Overhead Studio Light
+    const topLight = new THREE.DirectionalLight(0xfff0f0, 1.8);
+    topLight.position.set(0, 15, 0);
     scene.add(topLight);
 
-    // Crimson Red Rim Light (Matches website accent)
-    const rim = new THREE.DirectionalLight(0xff6b5a, 2.6);
+    // Crimson Red Rim Light (Accentuates rear fenders & roofline in deep red)
+    const rim = new THREE.DirectionalLight(0xbe1c21, 2.2);
     rim.position.set(8, 6, -8);
     scene.add(rim);
 
     // Front-Right Fill Light
-    const fill = new THREE.DirectionalLight(0xfff0f0, 1.6);
+    const fill = new THREE.DirectionalLight(0xfff2f2, 1.2);
     fill.position.set(8, -2, 6);
     scene.add(fill);
 
     // Deep Crimson Ground bounce under chassis
-    const bounce = new THREE.DirectionalLight(0x7a0d0d, 0.9);
+    const bounce = new THREE.DirectionalLight(0x78060e, 0.9);
     bounce.position.set(0, -5, 0);
     scene.add(bounce);
 
@@ -115,57 +115,69 @@ const Global3DCar = () => {
       (gltf) => {
         const car = gltf.scene;
 
-        // Custom showroom material tuning
+        // Custom showroom material tuning (Exact BMW Melbourne Red from reference photo)
         car.traverse((o) => {
           if (!o.isMesh) return;
           o.castShadow = true;
           o.receiveShadow = true;
           if (o.material) {
-            o.material.envMapIntensity = 1.8;
+            o.material.envMapIntensity = 0.60;
             const matName = (o.material.name || o.name || '').toLowerCase();
 
-            // Main Car Body Paint: Metallic Crimson Red (Matches template website exactly)
+            // Clearcoat: Controlled, sleek automotive clearcoat (less shiny, no harsh mirror glare)
+            if ('clearcoat' in o.material) {
+              o.material.clearcoat = 0.28;
+              o.material.clearcoatRoughness = 0.38;
+            }
+
+            // Main Car Body Paint: Melbourne Red Metallic (Sampled directly from user reference photo)
             if (matName.includes('paint')) {
-              o.material.color = new THREE.Color(0xb01212); // Deep rich Mansory Crimson Red
-              o.material.roughness = 0.16;
-              o.material.metalness = 0.12;
+              o.material.color = new THREE.Color(0x9e080d); // Deep metallic Melbourne Red (#9e080d)
+              o.material.roughness = 0.36; // Luxurious automotive clearcoat sheen
+              o.material.metalness = 0.30; // Subtle metallic flake depth
+              o.material.envMapIntensity = 0.65;
             }
-            // Aero Accents & Calipers: Vibrant Highlight Red
+            // Aero Accents & Calipers: Cohesive Deep Crimson Red
             else if (matName.includes('material') || matName.includes('blu') || matName.includes('cali')) {
-              o.material.color = new THREE.Color(0xff3535); // Accent Red (#ff3535)
-              o.material.roughness = 0.18;
-              o.material.metalness = 0.22;
+              o.material.color = new THREE.Color(0x8a060b); // Deep rich crimson
+              o.material.roughness = 0.38;
+              o.material.metalness = 0.25;
+              o.material.envMapIntensity = 0.55;
             }
-            // Glass Canopy & Windshield
+            // Canopy / Roof / Hood Center: Cohesive Deep Red Body
+            else if (matName.includes('glack')) {
+              o.material.color = new THREE.Color(0x8c070c); // Matching deep red tone
+              o.material.roughness = 0.38;
+              o.material.metalness = 0.25;
+              o.material.envMapIntensity = 0.55;
+            }
+            // Glass Canopy & Windshield: Deep tinted automotive glass
             else if (matName.includes('glass')) {
               o.material.transparent = true;
-              o.material.opacity = 0.55;
-              o.material.roughness = 0.05;
-              o.material.metalness = 0.1;
-              o.material.color = new THREE.Color(0x334155);
+              o.material.opacity = 0.58;
+              o.material.roughness = 0.10;
+              o.material.metalness = 0.10;
+              o.material.color = new THREE.Color(0x1f2937);
+              o.material.envMapIntensity = 0.70;
             }
-            // Chrome Rims & Brake Discs
+            // Wheels / Rims: Machined Silver Alloy (Matches photo)
             else if (matName.includes('chrome') || matName.includes('bhrome') || matName.includes('disc')) {
-              o.material.color = new THREE.Color(0xe2e8f0);
-              o.material.metalness = 0.9;
-              o.material.roughness = 0.12;
+              o.material.color = new THREE.Color(0xd5dade);
+              o.material.metalness = 0.85;
+              o.material.roughness = 0.25;
+              o.material.envMapIntensity = 0.70;
             }
             // Headlights & Taillights
             else if (matName.includes('light')) {
-              o.material.emissive = new THREE.Color(0xe0f2fe);
-              o.material.emissiveIntensity = 2.5;
+              o.material.emissive = new THREE.Color(0xff3333);
+              o.material.emissiveIntensity = 1.6;
             }
-            // Gloss Piano Black Canopy / Hood V-stripe
-            else if (matName.includes('glack')) {
-              o.material.color = new THREE.Color(0x0f172a);
-              o.material.roughness = 0.12;
-              o.material.metalness = 0.3;
-            }
-            // Matte Trim, Diffuser & Tires (Charcoal slate, not dark hole)
+            // Front & Rear Bumper lower air intakes, diffuser, and tires: Sleek Dark Black/Charcoal (Matches photo lower bumper)
             else if (matName.includes('tire') || matName.includes('mlack') || matName.includes('bumpa')) {
-              o.material.color = new THREE.Color(0x1e293b);
-              o.material.roughness = 0.75;
+              o.material.color = new THREE.Color(0x1c1c1f);
+              o.material.roughness = 0.80;
               o.material.metalness = 0.05;
+              o.material.envMapIntensity = 0.25;
             }
           }
         });

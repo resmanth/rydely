@@ -57,23 +57,35 @@ function CarMesh({ scrollY, hovered, setHovered }) {
     const newBox = new THREE.Box3().setFromObject(scene);
     scene.position.y -= newBox.min.y;
 
-    // Enhance materials: glossy automotive paint & crisp glass
+    // Enhance materials: BMW Melbourne Red (Exact match to reference photo)
     scene.traverse((child) => {
-      if (child.isMesh) {
+      if (child.isMesh && child.material) {
         child.castShadow = true;
         child.receiveShadow = true;
-        if (child.material) {
-          child.material.envMapIntensity = 1.9;
-          // Make sure glass is translucent and paint is glossy
-          const matName = child.material.name ? child.material.name.toLowerCase() : '';
-          if (matName.includes('glass')) {
-            child.material.transparent = true;
-            child.material.opacity = 0.55;
-            child.material.roughness = 0.05;
-          } else if (matName.includes('paint') || matName.includes('bumpa') || matName.includes('bhrome')) {
-            child.material.roughness = Math.min(child.material.roughness ?? 0.35, 0.3);
-            child.material.metalness = Math.max(child.material.metalness ?? 0.5, 0.6);
-          }
+        child.material.envMapIntensity = 0.60;
+        const matName = (child.material.name || child.name || '').toLowerCase();
+
+        if ('clearcoat' in child.material) {
+          child.material.clearcoat = 0.28;
+          child.material.clearcoatRoughness = 0.38;
+        }
+
+        if (matName.includes('paint')) {
+          child.material.color = new THREE.Color(0x9e080d);
+          child.material.roughness = 0.36;
+          child.material.metalness = 0.30;
+        } else if (matName.includes('material') || matName.includes('blu') || matName.includes('cali')) {
+          child.material.color = new THREE.Color(0x8a060b);
+          child.material.roughness = 0.38;
+          child.material.metalness = 0.25;
+        } else if (matName.includes('glass')) {
+          child.material.transparent = true;
+          child.material.opacity = 0.58;
+          child.material.roughness = 0.10;
+        } else if (matName.includes('glack')) {
+          child.material.color = new THREE.Color(0x8c070c);
+          child.material.roughness = 0.38;
+          child.material.metalness = 0.25;
         }
       }
     });

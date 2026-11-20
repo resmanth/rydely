@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CarCard from '../components/CarCard';
 import { sampleCars } from '../data/cars';
@@ -39,7 +39,31 @@ const Cars = () => {
   const [deliveryOnly, setDeliveryOnly] = useState(deliveryRequested);
 
   // Keep the filter state in sync if the URL changes.
-  useEffect(() => {
+  const [prevUrlCity, setPrevUrlCity] = useState(urlCity);
+  const [prevUrlCat, setPrevUrlCat] = useState(urlCategory);
+  const [prevUrlMin, setPrevUrlMin] = useState(urlMinPrice);
+  const [prevUrlMax, setPrevUrlMax] = useState(urlMaxPrice);
+  const [prevUrlSort, setPrevUrlSort] = useState(urlSortBy);
+  const [prevUrlInst, setPrevUrlInst] = useState(urlInstantOnly);
+  const [prevDel, setPrevDel] = useState(deliveryRequested);
+
+  if (
+    prevUrlCity !== urlCity ||
+    prevUrlCat !== urlCategory ||
+    prevUrlMin !== urlMinPrice ||
+    prevUrlMax !== urlMaxPrice ||
+    prevUrlSort !== urlSortBy ||
+    prevUrlInst !== urlInstantOnly ||
+    prevDel !== deliveryRequested
+  ) {
+    setPrevUrlCity(urlCity);
+    setPrevUrlCat(urlCategory);
+    setPrevUrlMin(urlMinPrice);
+    setPrevUrlMax(urlMaxPrice);
+    setPrevUrlSort(urlSortBy);
+    setPrevUrlInst(urlInstantOnly);
+    setPrevDel(deliveryRequested);
+
     setCity(urlCity);
     setCategory(urlCategory.toLowerCase());
     setMinPrice(urlMinPrice);
@@ -47,28 +71,7 @@ const Cars = () => {
     setSortBy(urlSortBy);
     setInstantOnly(urlInstantOnly);
     setDeliveryOnly(deliveryRequested);
-  }, [
-    urlCity,
-    urlCategory,
-    urlMinPrice,
-    urlMaxPrice,
-    urlSortBy,
-    urlInstantOnly,
-    deliveryRequested,
-  ]);
-
-  // Update one URL parameter without removing the others.
-  const updateSearchParam = (key, value, defaultValue = '') => {
-    setSearchParams((params) => {
-      if (value === defaultValue || value === '') {
-        params.delete(key);
-      } else {
-        params.set(key, String(value));
-      }
-
-      return params;
-    }, { replace: true });
-  };
+  }
 
   const filteredCars = useMemo(() => {
     let result = [...sampleCars];

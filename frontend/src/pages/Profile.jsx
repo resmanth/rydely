@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -43,7 +43,6 @@ const demoBookings = [
 ];
 
 const Profile = () => {
-  const navigate = useNavigate();
   const [active, setActive] = useState('overview');
   const [user, setUser] = useState(demoUser);
   const [loading, setLoading] = useState(false);
@@ -53,11 +52,8 @@ const Profile = () => {
   useEffect(() => {
     const token = localStorage.getItem('rydely-token');
 
-    // No token? Show the demo profile instead of redirecting.
+    // No token? Default initial state already has demoUser.
     if (!token) {
-      setUser(demoUser);
-      setIsDemo(true);
-      setLoading(false);
       return;
     }
 
@@ -77,7 +73,7 @@ const Profile = () => {
         setUser(data.user);
         setIsDemo(false);
         setError('');
-      } catch (err) {
+      } catch {
         // Keep the page accessible even if the backend is unavailable.
         setUser(demoUser);
         setIsDemo(true);

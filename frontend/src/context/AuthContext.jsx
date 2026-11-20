@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
         };
 
         restoreSession();
-    }, []);
+    }, [token]);
 
     const login = async (email, password) => {
         const data = await apiRequest('/api/user/login', {
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await fetchUser(data.token);
         } catch (error) {
-            throw new Error('Login succeeded, but we could not load your profile.');
+            throw new Error('Login succeeded, but we could not load your profile.', { cause: error });
         }
     };
 
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await fetchUser(data.token);
         } catch (error) {
-            throw new Error('Account created, but we could not load your profile.');
+            throw new Error('Account created, but we could not load your profile.', { cause: error });
         }
     };
 
@@ -115,6 +115,7 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     return useContext(AuthContext);
 };

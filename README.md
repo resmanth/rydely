@@ -8,8 +8,8 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white)](https://mongoosejs.com/)
 [![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
 
@@ -62,12 +62,12 @@
 <br><strong>Express</strong>
 </td>
 <td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=postgres" width="48" height="48" alt="PostgreSQL" />
-<br><strong>PostgreSQL</strong>
+<img src="https://skillicons.dev/icons?i=mongodb" width="48" height="48" alt="MongoDB" />
+<br><strong>MongoDB</strong>
 </td>
 <td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=prisma" width="48" height="48" alt="Prisma" />
-<br><strong>Prisma</strong>
+<img src="https://skillicons.dev/icons?i=express" width="48" height="48" alt="Mongoose" />
+<br><strong>Mongoose</strong>
 </td>
 <td align="center" width="96">
 <img src="https://skillicons.dev/icons?i=css" width="48" height="48" alt="CSS" />

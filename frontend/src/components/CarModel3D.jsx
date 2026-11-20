@@ -1,14 +1,15 @@
-/* eslint-disable react-hooks/immutability */
-/**
- * CarModel3D.jsx — BMW i8 GLTF Hero Viewer
- *
- * Enhanced to:
- *  - Make the 3D car significantly larger and bolder (targetSize: 5.0)
- *  - Position it at a cinematic 3/4 angle on the highway road
- *  - Natural outdoor highway lighting (sunlight + sky fill + BMW Electric Blue underglow)
- *  - Interactive: slow idle floating / rotation, drag to orbit, hover pause, scroll sink
- */
+// ============================================================
+// CarModel3D.jsx — Standalone React Three Fiber BMW i8 Viewer
+// ------------------------------------------------------------
+// An optional/modular Three.js viewer component built with
+// React Three Fiber (@react-three/fiber and @react-three/drei).
+// It demonstrates:
+//   - GLTF model loading with OrbitControls
+//   - Soft ContactShadows and dynamic highway lighting
+//   - Interactive hover, turntable rotation, and idle float
+// ============================================================
 
+/* eslint-disable react-hooks/immutability */
 import { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment, ContactShadows, Html } from '@react-three/drei';
@@ -17,7 +18,7 @@ import * as THREE from 'three';
 // Preload the BMW i8 model
 useGLTF.preload('/car-model.gltf');
 
-// ── Sleek Loader ────────────────────────────────────────────────────────────
+// Sleek Loader Fallback
 function Loader() {
   return (
     <Html center>
@@ -32,7 +33,7 @@ function Loader() {
   );
 }
 
-// ── The 3D car mesh ─────────────────────────────────────────────────────────
+// The 3D car mesh component
 function CarMesh({ scrollY, hovered, setHovered }) {
   const groupRef = useRef();
   const { scene } = useGLTF('/car-model.gltf');
@@ -48,154 +49,77 @@ function CarMesh({ scrollY, hovered, setHovered }) {
     // Centre the model on origin
     scene.position.sub(centre);
 
-    // Make car significantly bigger to span more width: 6.8 units across
+    // Scale so the largest dimension is 5 units
     const maxDim = Math.max(size.x, size.y, size.z);
-    const targetSize = 6.8;
-    scene.scale.setScalar(targetSize / maxDim);
+    const targetSize = 5.0;
+    const scale = targetSize / maxDim;
+    scene.scale.setScalar(scale);
 
-    // Sit directly on the ground plane (y = 0)
-    const newBox = new THREE.Box3().setFromObject(scene);
-    scene.position.y -= newBox.min.y;
-
-    // Enhance materials: BMW Melbourne Red (Exact match to reference photo)
-    scene.traverse((child) => {
-      if (child.isMesh && child.material) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        child.material.envMapIntensity = 0.60;
-        const matName = (child.material.name || child.name || '').toLowerCase();
-
-        if ('clearcoat' in child.material) {
-          child.material.clearcoat = 0.28;
-          child.material.clearcoatRoughness = 0.38;
-        }
-
-        if (matName.includes('paint')) {
-          child.material.color = new THREE.Color(0x9e080d);
-          child.material.roughness = 0.36;
-          child.material.metalness = 0.30;
-        } else if (matName.includes('material') || matName.includes('blu') || matName.includes('cali')) {
-          child.material.color = new THREE.Color(0x8a060b);
-          child.material.roughness = 0.38;
-          child.material.metalness = 0.25;
-        } else if (matName.includes('glass')) {
-          child.material.transparent = true;
-          child.material.opacity = 0.58;
-          child.material.roughness = 0.10;
-        } else if (matName.includes('glack')) {
-          child.material.color = new THREE.Color(0x8c070c);
-          child.material.roughness = 0.38;
-          child.material.metalness = 0.25;
-        }
-      }
-    });
+    // Place the tyres on the ground
+    scene.position.y += (size.y * scale) / 2;
   }, [scene]);
 
+  // Frame animation: idle breathing float & scroll response
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
-    // Slow subtle rotation when idle
     if (!hovered) {
-      groupRef.current.rotation.y += delta * 0.18;
+      // Gentle floating animation
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 1.2) * 0.05;
+      // Very slow idle rotation
+      groupRef.current.rotation.y += delta * 0.12;
     }
 
-    // Scroll-driven Y sink (car sinks as user scrolls)
-    const targetY = -(scrollY * 0.0022);
-    groupRef.current.position.y = THREE.MathUtils.lerp(
-      groupRef.current.position.y,
-      targetY,
-      0.08
-    );
-
-    // Gentle scale bounce on hover
-    const targetScale = hovered ? 1.04 : 1.0;
-    const current = groupRef.current.scale.x;
-    groupRef.current.scale.setScalar(
-      THREE.MathUtils.lerp(current, targetScale, 0.1)
-    );
+    // Scroll sink: sink slightly as page scrolls
+    const targetY = -scrollY * 0.001;
+    groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.05;
   });
 
   return (
-    <primitive
+    <group
       ref={groupRef}
-      object={scene}
-      rotation={[0, -0.35, 0]} // Initial stylish 3/4 highway road angle
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-    />
+      rotation={[0.08, -0.65, 0]}
+    >
+      <primitive object={scene} />
+      <ContactShadows
+        position={[0, -0.02, 0]}
+        opacity={0.85}
+        scale={10}
+        blur={2}
+        far={4}
+        color="#000000"
+      />
+    </group>
   );
 }
 
-// ── Main Exported Component ─────────────────────────────────────────────────
 const CarModel3D = ({ scrollY = 0 }) => {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
-      className="w-full h-[400px] sm:h-[500px] md:h-[580px] lg:h-[650px] relative"
-      style={{
-        cursor: hovered ? 'grab' : 'default',
-        opacity: Math.max(0, 1 - scrollY / 600),
-        transition: 'opacity 0.15s ease-out',
-      }}
-    >
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
       <Canvas
-        shadows
-        camera={{ position: [2.5, 1.15, 3.8], fov: 46 }}
-        gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
-        style={{ background: 'transparent' }}
+        camera={{ position: [4.2, 1.8, 4.8], fov: 42 }}
+        gl={{ antialias: true, alpha: true }}
       >
-        {/* Soft Ambient Sky Fill */}
-        <ambientLight intensity={0.85} color="#e0f2fe" />
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[10, 15, 8]} intensity={2.2} castShadow />
+        <directionalLight position={[-10, 8, -6]} intensity={1.0} color="#ff3535" />
+        <pointLight position={[0, -0.5, 0]} intensity={2.5} color="#0066b1" distance={6} />
 
-        {/* Direct Warm Golden-Hour Sunlight */}
-        <directionalLight
-          position={[12, 16, 7]}
-          intensity={2.6}
-          color="#fffaf0"
-          castShadow
-          shadow-mapSize={[2048, 2048]}
-          shadow-camera-near={0.5}
-          shadow-camera-far={30}
-          shadow-camera-left={-12}
-          shadow-camera-right={12}
-          shadow-camera-top={12}
-          shadow-camera-bottom={-12}
-        />
-
-        {/* Sky Fill Light (Cool Blue) */}
-        <directionalLight position={[-8, 7, -5]} intensity={0.9} color="#7dd3fc" />
-
-        {/* BMW Electric Blue Ground Reflection under chassis */}
-        <pointLight position={[0, -0.1, 0]} intensity={1.8} color="#0284c7" distance={8} decay={2} />
-
-        {/* Realistic Sunset/Outdoor Highway Environment */}
-        <Environment preset="sunset" />
-
-        {/* Realistic Contact Shadow on Highway Asphalt - wider span */}
-        <ContactShadows
-          position={[0, 0, 0]}
-          opacity={0.8}
-          scale={24}
-          blur={2.4}
-          far={6}
-          color="#050814"
-        />
-
-        {/* Car Model */}
         <Suspense fallback={<Loader />}>
           <CarMesh scrollY={scrollY} hovered={hovered} setHovered={setHovered} />
+          <Environment preset="city" />
         </Suspense>
 
-        {/* Orbit Controls (Drag to inspect car, constrained to stay above ground) */}
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          minPolarAngle={Math.PI / 4.8}
-          maxPolarAngle={Math.PI / 2.05}
-          dampingFactor={0.08}
-          enableDamping
-          rotateSpeed={0.55}
+          maxPolarAngle={Math.PI / 2 - 0.05}
+          minPolarAngle={Math.PI / 4}
+          rotateSpeed={0.6}
         />
       </Canvas>
     </div>

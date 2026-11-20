@@ -1,3 +1,15 @@
+// ============================================================
+// CarCard.jsx — Individual Vehicle Presentation Card
+// ------------------------------------------------------------
+// This reusable component displays a car in catalog and search grids:
+//   - Vehicle city location badge & category/superhost pill
+//   - Vehicle photograph with hover zoom animation
+//   - Title, host name, star rating, and completed trip count
+//   - Key mechanical specs (Transmission, Fuel, Seating, Year)
+//   - Pricing in Indian Rupees (₹) per day
+//   - "Book Now" action button that routes to /cars/:id
+// ============================================================
+
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -21,8 +33,11 @@ const CarCard = ({
 }) => {
   const navigate = useNavigate();
   const routerLocation = useLocation();
-  const [imgLoaded, setImgLoaded] = useState(false);
 
+  // State to track if image finished loading (smooth fade-in)
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Format price nicely as Indian Rupee string (e.g. ₹4,500)
   const formattedPrice =
     typeof price === 'number'
       ? `₹${price.toLocaleString('en-IN')}`
@@ -30,19 +45,24 @@ const CarCard = ({
         ? price
         : `₹${price}`;
 
+  // Handle Book Now button click
   const handleBook = () => {
     if (!isAvailable) return;
 
     if (onBookNow) {
       onBookNow({ id, name, price, location });
     } else {
+      // Preserve search filters in query params when navigating to details page
       navigate(`/cars/${encodeURIComponent(id)}${routerLocation.search}`);
     }
   };
+
+  // Normalize specs whether passed as array [{label, val}] or object {Fuel: "Petrol"}
   const normalizedSpecs = Array.isArray(specs)
     ? specs
     : Object.entries(specs || {}).map(([label, val]) => ({ label, val }));
 
+  // Helper flags for conditional badge rendering
   const showRating = rating !== undefined && rating !== null;
   const showTrips = tripsCount !== undefined && tripsCount !== null;
   const showHost = hostName !== undefined && hostName !== null;
@@ -51,9 +71,11 @@ const CarCard = ({
   return (
     <div className="group relative bg-zinc-950/85 hover:bg-zinc-900/95 backdrop-blur-xl border border-red-950/50 hover:border-red-500/50 rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-xl hover:shadow-[0_20px_40px_rgba(220,38,38,0.18)] hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden text-white font-['Outfit'] select-none">
 
+      {/* Top subtle red hover accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <div>
+        {/* --- Card Header: Location & Badge --- */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-300 bg-zinc-900/90 border border-zinc-800 px-2.5 py-1 rounded-full truncate max-w-[200px]">
             <span className="text-red-400">📍</span>
@@ -75,6 +97,7 @@ const CarCard = ({
           ) : null}
         </div>
 
+        {/* --- Card Media: Car Image Container --- */}
         <div className="relative w-full h-36 sm:h-44 flex items-center justify-center my-2 overflow-hidden rounded-2xl bg-gradient-to-b from-white/5 to-transparent">
           <div className="absolute w-36 h-20 bg-red-600/15 rounded-full blur-2xl pointer-events-none group-hover:bg-red-600/25 transition-all" />
 
@@ -82,10 +105,10 @@ const CarCard = ({
             <img
               src={image}
               alt={name}
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgLoaded(false)}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
               className={`max-h-full max-w-[90%] object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.7)] group-hover:scale-108 transition-all duration-500 ease-out ${
-                imgLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}
               loading="lazy"
             />
@@ -96,6 +119,7 @@ const CarCard = ({
           )}
         </div>
 
+        {/* --- Vehicle Title & Host Info --- */}
         <div className="mt-2 mb-3">
           <div className="flex items-start justify-between gap-2">
             <div>
@@ -121,35 +145,38 @@ const CarCard = ({
           </div>
         </div>
 
+        {/* --- Mechanical Specifications Grid (Transmission, Fuel, etc.) --- */}
         {normalizedSpecs.length > 0 && (
           <div className="grid grid-cols-2 gap-2 py-2.5 border-y border-zinc-800/70 mb-3 text-left">
-            {normalizedSpecs.slice(0, 4).map((s, i) => (
-              <div key={i} className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl px-2.5 py-1.5">
+            {normalizedSpecs.slice(0, 4).map((specItem, index) => (
+              <div key={index} className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl px-2.5 py-1.5">
                 <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">
-                  {s.label}
+                  {specItem.label}
                 </span>
                 <span className="text-xs font-bold text-white truncate block">
-                  {s.val}
+                  {specItem.val}
                 </span>
               </div>
             ))}
           </div>
         )}
 
+        {/* --- Vehicle Features Pills (Sunroof, GPS, 360 Cam) --- */}
         {features && features.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap mb-4">
-            {features.slice(0, 3).map((f, i) => (
+            {features.slice(0, 3).map((featureItem, index) => (
               <span
-                key={i}
+                key={index}
                 className="text-[10px] text-slate-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded-md"
               >
-                ✓ {f}
+                ✓ {featureItem}
               </span>
             ))}
           </div>
         )}
       </div>
 
+      {/* --- Card Footer: Pricing & Action Button --- */}
       <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between gap-3">
         <div>
           <span className="block text-[9px] font-mono uppercase tracking-wider text-slate-400">

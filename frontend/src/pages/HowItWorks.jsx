@@ -1,8 +1,26 @@
+// ============================================================
+// HowItWorks.jsx — User & Host Onboarding Walkthrough
+// ------------------------------------------------------------
+// This page provides an educational guide for visitors:
+//   - Tab Switcher: "I want to rent" vs "I want to host"
+//   - 4-Step Visual Journey for Renters:
+//       01: Find your ride (city & filter selection)
+//       02: Get verified (DigiLocker KYC & license check)
+//       03: Pick up your car (doorstep delivery or host handover)
+//       04: Enjoy the drive (return on agreed schedule)
+//   - 4-Step Visual Journey for Hosts:
+//       01: Add your vehicle (specs, RC & insurance upload)
+//       02: Set your price (daily rate & custom calendar)
+//       03: Connect with renters (review & approve requests)
+//       04: Earn from your car (direct UPI settlements)
+//   - Accordion FAQ Section & Dual CTA (Browse Cars / List Your Car)
+// ============================================================
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const renterSteps = [
+// 4-step workflow for self-drive car renters
+const renterGuideSteps = [
   {
     number: '01',
     icon: '🔎',
@@ -29,7 +47,8 @@ const renterSteps = [
   },
 ];
 
-const hostSteps = [
+// 4-step workflow for private car owners (hosts)
+const hostGuideSteps = [
   {
     number: '01',
     icon: '🚘',
@@ -56,7 +75,8 @@ const hostSteps = [
   },
 ];
 
-const faqs = [
+// Common FAQs regarding bookings, insurance, and hosting
+const frequentlyAskedQuestions = [
   {
     q: 'How do I book a car?',
     a: 'Browse the available cars, open the vehicle you like, select your trip dates and follow the booking process.',
@@ -80,19 +100,23 @@ const faqs = [
 ];
 
 const HowItWorks = () => {
+  // Tab state: 'renter' or 'host'
   const [activeTab, setActiveTab] = useState('renter');
-  const [openFaq, setOpenFaq] = useState(0);
+  // Accordion state: index of currently opened FAQ (-1 for closed)
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
-  const steps = activeTab === 'renter' ? renterSteps : hostSteps;
+  // Dynamically switch steps according to current role tab
+  const currentSteps = activeTab === 'renter' ? renterGuideSteps : hostGuideSteps;
 
   return (
-    <div className="min-h-screen bg-[#080607] text-white pt-28 pb-20">
-      {/* HERO */}
+    <div className="min-h-screen bg-[#080607] text-white pt-28 pb-20 font-['Outfit']">
+
+      {/* --- Section 1: Hero Header & Mode Switcher --- */}
       <section className="relative overflow-hidden px-5 pb-20 pt-12">
-        <div className="absolute inset-0 pointer-events-none"
+        <div
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'radial-gradient(ellipse at 50% 0%, rgba(220,38,38,.22), transparent 60%)',
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(220,38,38,.22), transparent 60%)',
           }}
         />
 
@@ -114,10 +138,12 @@ const HowItWorks = () => {
             or turn your parked car into an opportunity.
           </p>
 
+          {/* Renter vs Host Mode Toggle Buttons */}
           <div className="mt-9 inline-flex rounded-2xl border border-white/10 bg-white/[0.04] p-1.5">
             <button
+              type="button"
               onClick={() => setActiveTab('renter')}
-              className={`rounded-xl px-5 sm:px-8 py-3 text-xs sm:text-sm font-bold transition-all ${
+              className={`rounded-xl px-5 sm:px-8 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'renter'
                   ? 'bg-red-600 text-white shadow-lg shadow-red-900/40'
                   : 'text-zinc-400 hover:text-white'
@@ -126,8 +152,9 @@ const HowItWorks = () => {
               I want to rent
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('host')}
-              className={`rounded-xl px-5 sm:px-8 py-3 text-xs sm:text-sm font-bold transition-all ${
+              className={`rounded-xl px-5 sm:px-8 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'host'
                   ? 'bg-red-600 text-white shadow-lg shadow-red-900/40'
                   : 'text-zinc-400 hover:text-white'
@@ -139,7 +166,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* STEPS */}
+      {/* --- Section 2: 4-Step Process Cards --- */}
       <section className="max-w-7xl mx-auto px-5">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-9">
           <div>
@@ -160,7 +187,7 @@ const HowItWorks = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {steps.map((step) => (
+          {currentSteps.map((step) => (
             <article
               key={step.number}
               className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900 to-[#100b0c] p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1 hover:border-red-500/40"
@@ -183,7 +210,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* FEATURE STRIP */}
+      {/* --- Section 3: Feature Highlights Strip --- */}
       <section className="max-w-7xl mx-auto px-5 mt-24">
         <div className="grid md:grid-cols-3 gap-4">
           {[
@@ -200,7 +227,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* --- Section 4: Accordion FAQs --- */}
       <section className="max-w-4xl mx-auto px-5 mt-24">
         <div className="text-center mb-10">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-red-400">Need clarity?</p>
@@ -208,18 +235,19 @@ const HowItWorks = () => {
         </div>
 
         <div className="space-y-3">
-          {faqs.map((faq, index) => (
+          {frequentlyAskedQuestions.map((faq, index) => (
             <div key={faq.q} className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
               <button
-                onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
-                className="w-full flex items-center justify-between gap-4 p-5 text-left"
+                type="button"
+                onClick={() => setOpenFaqIndex(openFaqIndex === index ? -1 : index)}
+                className="w-full flex items-center justify-between gap-4 p-5 text-left cursor-pointer"
               >
                 <span className="text-sm sm:text-base font-semibold">{faq.q}</span>
-                <span className={`text-xl text-red-400 transition-transform ${openFaq === index ? 'rotate-45' : ''}`}>
+                <span className={`text-xl text-red-400 transition-transform ${openFaqIndex === index ? 'rotate-45' : ''}`}>
                   +
                 </span>
               </button>
-              {openFaq === index && (
+              {openFaqIndex === index && (
                 <p className="px-5 pb-5 text-sm leading-relaxed text-zinc-400">
                   {faq.a}
                 </p>
@@ -229,7 +257,7 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* --- Section 5: Bottom Dual Call to Action --- */}
       <section className="max-w-6xl mx-auto px-5 mt-24">
         <div className="relative overflow-hidden rounded-[2rem] border border-red-500/30 bg-gradient-to-br from-red-950 via-[#250b10] to-zinc-950 px-7 py-12 sm:px-12 sm:py-16 text-center">
           <div className="absolute w-72 h-72 rounded-full bg-red-600/20 blur-[100px] -top-32 left-1/2 -translate-x-1/2" />

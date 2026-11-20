@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { bookingApi } from '../services/api';
@@ -63,41 +63,53 @@ const Profile = () => {
   const isDemo = !isAuthenticated;
   const currentUser = isDemo ? demoUser : (user || demoUser);
 
-  const fetchBookings = useCallback(async () => {
-    if (!isAuthenticated) return;
-    setBookingsLoading(true);
-    setBookingsError('');
-    try {
-      const data = await bookingApi.mine();
-      const rawList = data.bookings || [];
-      const mapped = rawList.map((b) => {
-        const car = b.car || {};
-        return {
-          _id: b._id,
-          car: `${car.brand || ''} ${car.model || ''}`.trim() || 'Unknown Vehicle',
-          type: (car.category || 'Standard').toUpperCase(),
-          dates: formatDateRange(b.pickupDate, b.returnDate),
-          rawPrice: b.price ?? 0,
-          price: `₹${(b.price ?? 0).toLocaleString('en-IN')}`,
-          status: (b.status || 'pending').toUpperCase(),
-          image: car.image || '',
-        };
-      });
-      setBookings(mapped);
-    } catch (err) {
-      setBookingsError(err.message || 'Could not load bookings');
-    } finally {
-      setBookingsLoading(false);
-    }
-  }, [isAuthenticated]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchBookings();
-    } else {
-      setBookings([]);
+    let isCancelled = false;
+
+    if (!isAuthenticated) {
+      return;
     }
-  }, [isAuthenticated, fetchBookings]);
+
+    const loadBookings = async () => {
+      setBookingsLoading(true);
+      setBookingsError('');
+      try {
+        const data = await bookingApi.mine();
+        if (isCancelled) return;
+        const rawList = data.bookings || [];
+        const mapped = rawList.map((b) => {
+          const car = b.car || {};
+          return {
+            _id: b._id,
+            car: `${car.brand || ''} ${car.model || ''}`.trim() || 'Unknown Vehicle',
+            type: (car.category || 'Standard').toUpperCase(),
+            dates: formatDateRange(b.pickupDate, b.returnDate),
+            rawPrice: b.price ?? 0,
+            price: `₹${(b.price ?? 0).toLocaleString('en-IN')}`,
+            status: (b.status || 'pending').toUpperCase(),
+            image: car.image || '',
+          };
+        });
+        setBookings(mapped);
+      } catch (err) {
+        if (!isCancelled) {
+          setBookingsError(err.message || 'Could not load bookings');
+        }
+      } finally {
+        if (!isCancelled) {
+          setBookingsLoading(false);
+        }
+      }
+    };
+
+    loadBookings();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, refreshTrigger]);
 
   const handleLogout = () => {
     logout();
@@ -213,7 +225,7 @@ const Profile = () => {
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-center">
             <p className="text-xs text-amber-400">{bookingsError}</p>
             <button
-              onClick={fetchBookings}
+              onClick={() => setRefreshTrigger((prev) => prev + 1)}
               className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-500 text-xs font-bold rounded-lg"
             >
               Retry

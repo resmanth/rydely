@@ -1,26 +1,54 @@
+/**
+ * App.jsx — Root component of the Rydely frontend.
+ *
+ * This file does three main things:
+ * 1. Sets up the React Router (URL-based page navigation).
+ * 2. Wraps the app in AuthProvider so every page can access login/logout state.
+ * 3. Initialises Lenis for buttery-smooth scrolling across all pages.
+ *
+ * The AppLayout component handles the page structure:
+ *   - Navbar, Preloader, and ScrollLogo appear on every page EXCEPT /login.
+ *   - Footer appears on every page EXCEPT /login.
+ *   - The <Routes> block decides which page component to show for each URL.
+ */
+
+// --- Page Imports ---
 import CarDetails from './pages/CarDetails';
 import Profile from './pages/Profile';
 import ListYourCar from './pages/ListYourCar';
 import OwnerDashboard from './pages/owner/Dashboard';
 import OwnerCars from './pages/owner/Cars';
 import OwnerBookings from './pages/owner/Bookings';
-import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import Lenis from 'lenis';
-import 'lenis/dist/lenis.css';
-import Navbar from './components/Navbar';
-import ScrollLogo from './components/ScrollLogo';
-import Footer from './components/Footer';
 import Home from './pages/Home';
 import Cars from './pages/Cars';
 import HowItWorks from './pages/HowItWorks';
 import About from './pages/About';
 import Login from './pages/Login';
+
+// --- React & Router Imports ---
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+
+// --- UI Library Imports ---
+import { Toaster } from 'react-hot-toast';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
+
+// --- Shared Component Imports ---
+import Navbar from './components/Navbar';
+import ScrollLogo from './components/ScrollLogo';
+import Footer from './components/Footer';
 import Preloader from './components/Preloader';
+
+// --- Auth Context Import ---
 import { AuthProvider } from './context/AuthContext';
 
+// ============================================================
+// AppLayout — The shell that wraps every page
+// ============================================================
 const AppLayout = () => {
+  // useLocation() gives us the current URL path so we can
+  // conditionally hide the Navbar/Footer on the login page.
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
 
@@ -35,18 +63,25 @@ const AppLayout = () => {
         </>
       )}
 
-      {/* Main Content Area */}
+      {/* --- Main Content Area (page components render here) --- */}
       <main className="flex-1">
         <Routes>
+          {/* --- Public Pages --- */}
           <Route path="/" element={<Home />} />
           <Route path="/cars" element={<Cars />} />
           <Route path="/cars/:id" element={<CarDetails />} />
+
+          {/* Alias routes — multiple URLs all show the Cars page (for SEO / convenience) */}
           <Route path="/vehicles" element={<Cars />} />
           <Route path="/find-car" element={<Cars />} />
           <Route path="/rent-a-car" element={<Cars />} />
           <Route path="/rent-car" element={<Cars />} />
+
+          {/* --- Informational Pages --- */}
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/about" element={<About />} />
+
+          {/* --- Contact Page (inline JSX, no separate component) --- */}
           <Route
             path="/contact"
             element={
@@ -66,22 +101,35 @@ const AppLayout = () => {
               </div>
             }
           />
+
+          {/* --- Owner Pages (car listing & management) --- */}
           <Route path="/offer-ride" element={<ListYourCar />} />
           <Route path="/owner/dashboard" element={<OwnerDashboard />} />
           <Route path="/owner/cars" element={<OwnerCars />} />
           <Route path="/owner/bookings" element={<OwnerBookings />} />
+
+          {/* --- User Account Pages --- */}
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </main>
 
-      {/* ── 1. Master Global Footer Sitting at the Bottom of Every Page ── */}
+      {/* --- Footer (hidden on login page) --- */}
       {!isLoginPage && <Footer />}
     </div>
   );
 };
 
+// ============================================================
+// App — Top-level component that sets up providers & smooth scrolling
+// ============================================================
 const App = () => {
+  /**
+   * Lenis smooth-scroll setup.
+   * Lenis intercepts native scroll events and applies a smooth easing
+   * animation so the page scrolls fluidly instead of jumping.
+   * We drive it with requestAnimationFrame so it updates every frame.
+   */
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -94,6 +142,7 @@ const App = () => {
       infinite: false,
     });
 
+    // Start the animation loop — Lenis needs to be called every frame
     let animationFrameId;
     function raf(time) {
       lenis.raf(time);
@@ -101,6 +150,7 @@ const App = () => {
     }
     animationFrameId = requestAnimationFrame(raf);
 
+    // Cleanup: stop the loop and destroy Lenis when the component unmounts
     return () => {
       cancelAnimationFrame(animationFrameId);
       lenis.destroy();
@@ -109,8 +159,10 @@ const App = () => {
 
   return (
     <Router>
+      {/* AuthProvider gives every child component access to user/login/logout */}
       <AuthProvider>
         <AppLayout />
+        {/* Toaster shows pop-up notifications (success, error, etc.) at the top-center */}
         <Toaster
           position="top-center"
           toastOptions={{

@@ -2,26 +2,24 @@
 
 # 🏎️ R Y D E L Y
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=6C63FF&center=true&vCenter=true&random=false&width=500&lines=Book+your+ride+in+seconds+%F0%9F%9A%97;List+your+cars+and+earn+%F0%9F%92%B0;Full-stack+car+rental+platform+%E2%9A%A1" alt="Typing SVG" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=FF3535&center=true&vCenter=true&random=false&width=500&lines=Book+your+ride+in+seconds+%F0%9F%9A%97;List+your+cars+and+earn+%F0%9F%92%B0;Full-stack+peer-to-peer+rental+%E2%9A%A1" alt="Typing SVG" />
 
 <br/>
 
+[![React 19](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite_6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Express 5](https://img.shields.io/badge/Express_5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white)](https://mongoosejs.com/)
-[![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![ImageKit](https://img.shields.io/badge/ImageKit-0055FF?style=for-the-badge&logo=imagekit&logoColor=white)](https://imagekit.io/)
 [![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
 
 <br/>
 
-![GitHub repo size](https://img.shields.io/github/repo-size/resmanth/rydely?style=flat-square&color=6C63FF)
-![GitHub last commit](https://img.shields.io/github/last-commit/resmanth/rydely?style=flat-square&color=6C63FF)
-![GitHub](https://img.shields.io/github/license/resmanth/rydely?style=flat-square&color=6C63FF)
-
-<br/>
-
-[**🚀 Getting Started**](#-getting-started-1) · [**📡 API Reference**](#-api-reference) · [**🏗️ Architecture**](#-architecture) · [**🤝 Contributing**](#-contributing)
+[**🚀 Getting Started**](#-getting-started) · [**📡 API Reference**](#-api-reference) · [**🏗️ Architecture**](#-architecture) · [**🛠️ Tech Stack**](#-tech-stack) · [**🤝 Contributing**](#-contributing)
 
 </div>
 
@@ -29,17 +27,17 @@
 
 ## 🎯 What is Rydely?
 
-> **Rydely** is a modern, full-stack car rental platform that bridges the gap between customers looking for rides and vehicle owners ready to earn. Seamless booking. Real-time availability. Role-based dashboards. All in one place.
+> **Rydely** is a self-drive peer-to-peer car rental platform bridging the gap between drivers seeking machines and vehicle owners looking to monetize idle assets. Features real-time date availability, interactive 3D WebGL car visualizers, multi-city searching, host vehicle listing management, and instant booking workflows.
 
 ```
   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-  │   Customer   │────▶│    Rydely     │◀────│  Car Owner   │
-  │  Browse/Book │     │   Platform   │     │  List/Manage │
+  │   Renter     │────▶│    Rydely     │◀────│  Car Owner   │
+  │ Search & Book│     │   Platform   │     │  List & Host │
   └──────────────┘     └──────┬───────┘     └──────────────┘
                               │
                     ┌─────────┴─────────┐
-                    │   Admin Dashboard  │
-                    │   Monitor & Control│
+                    │   Host Operations │
+                    │ Fleet & Bookings  │
                     └───────────────────┘
 ```
 
@@ -47,95 +45,87 @@
 
 ## 🛠️ Tech Stack
 
-<table>
-<tr>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=react" width="48" height="48" alt="React" />
-<br><strong>React</strong>
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=nodejs" width="48" height="48" alt="Node.js" />
-<br><strong>Node.js</strong>
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=express" width="48" height="48" alt="Express" />
-<br><strong>Express</strong>
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=mongodb" width="48" height="48" alt="MongoDB" />
-<br><strong>MongoDB</strong>
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=express" width="48" height="48" alt="Mongoose" />
-<br><strong>Mongoose</strong>
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=css" width="48" height="48" alt="CSS" />
-<br><strong>CSS</strong>
-</td>
-</tr>
-</table>
+### Frontend
+- **Framework & Tooling**: [React 19](https://react.dev/), [Vite 6](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Routing**: [React Router v7](https://reactrouter.com/)
+- **3D Graphics & Animations**: [Three.js](https://threejs.org/), [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber), [@react-three/drei](https://github.com/pmndrs/drei)
+- **Smooth Scrolling**: [Lenis](https://lenis.darkroom.engineering/)
+- **Notifications**: [React Hot Toast](https://react-hot-toast.com/)
+
+### Backend
+- **Runtime & Server**: [Node.js](https://nodejs.org/), [Express 5](https://expressjs.com/)
+- **Database & ODM**: [MongoDB Atlas](https://www.mongodb.com/cloud/atlas), [Mongoose ODM](https://mongoosejs.com/)
+- **Authentication**: JSON Web Tokens (JWT), Bcrypt password hashing
+- **Media & Storage**: [ImageKit SDK](https://imagekit.io/) CDN, Multer multipart handling
+- **Security & CORS**: CORS enabled, environment isolation
 
 ---
 
 ## 🚀 Getting Started
 
-> **Prerequisites:** Node.js `v18+` · PostgreSQL `v14+` · npm or yarn
+> **Prerequisites:** Node.js `v18+` · MongoDB connection URI · npm
 
-#### 1️⃣ Clone & Install
+#### 1️⃣ Clone the Repository
 
 ```bash
-# Clone the repo
-git clone https://github.com/resmanth/rydely.git && cd rydely
-
-# Install backend deps
-cd server && npm install
-
-# Install frontend deps
-cd ../client && npm install
+git clone https://github.com/resmanth/rydely.git
+cd rydely
 ```
 
-#### 2️⃣ Configure Environment
+#### 2️⃣ Configure & Run Backend
 
-Create `server/.env`:
+```bash
+cd backend
+npm install
+```
+
+Create `backend/.env`:
 
 ```env
-# 🗄️ Database
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/rydely"
-
-# 🔐 Auth
-JWT_SECRET="your-secret-key"
-JWT_EXPIRES_IN="7d"
-
-# ⚙️ Server
-PORT=5000
-NODE_ENV=development
+PORT=3000
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.zues2dm.mongodb.net
+JWT_SECRET=your_jwt_secret_key
+IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_id
 ```
 
-#### 3️⃣ Database Setup
+Start the backend API:
 
 ```bash
-cd server
-npx prisma migrate dev --name init    # Run migrations
-npx prisma db seed                     # Seed data (optional)
+npm run server
 ```
 
-#### 4️⃣ Launch
+*(Server starts on `http://localhost:3000` and displays `Database Connected`)*
+
+#### 3️⃣ Configure & Run Frontend
+
+In a new terminal window:
 
 ```bash
-# Terminal 1 — Backend
-cd server && npm run dev
+cd frontend
+npm install
+```
 
-# Terminal 2 — Frontend
-cd client && npm start
+Create `frontend/.env` (or copy from `.env.example`):
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+Start Vite dev server:
+
+```bash
+npm run dev
 ```
 
 <div align="center">
 
 | Service    | URL                         |
 | ---------- | --------------------------- |
-| 🌐 Frontend | `http://localhost:3000`     |
-| ⚡ API      | `http://localhost:5000`     |
+| 🌐 Frontend | `http://localhost:5173`     |
+| ⚡ Backend  | `http://localhost:3000`     |
 
 </div>
 
@@ -143,57 +133,59 @@ cd client && npm start
 
 ## 📡 API Reference
 
+All requests requiring authentication expect the raw JWT token in the `Authorization` header (`Authorization: <raw_jwt>`).
+
 <details>
-<summary><strong>🔐 Authentication</strong></summary>
+<summary><strong>🔐 User & Auth (<code>/api/user</code>)</strong></summary>
 
 <br/>
 
-| Method | Endpoint | Description |
-|:------:|----------|-------------|
-| `POST` | `/api/auth/register` | Register a new user |
-| `POST` | `/api/auth/login` | Login & get token |
-| `GET` | `/api/auth/me` | Get current user profile |
+| Method | Endpoint | Description | Auth Required |
+|:------:|----------|-------------|:-------------:|
+| `POST` | `/api/user/register` | Register new user account (`{ name, email, password }`) | ❌ |
+| `POST` | `/api/user/login` | Login & receive JWT (`{ email, password }`) | ❌ |
+| `GET` | `/api/user/data` | Get profile & current role (`user` / `owner`) | ✅ |
 
 </details>
 
 <details>
-<summary><strong>🚗 Vehicles</strong></summary>
+<summary><strong>🚘 Availability & Search (<code>/api/booking</code>)</strong></summary>
 
 <br/>
 
-| Method | Endpoint | Description |
-|:------:|----------|-------------|
-| `GET` | `/api/vehicles` | List all available vehicles |
-| `GET` | `/api/vehicles/:id` | Get vehicle details |
-| `POST` | `/api/vehicles` | Add a new vehicle *(owner)* |
-| `PUT` | `/api/vehicles/:id` | Update vehicle *(owner)* |
-| `DELETE` | `/api/vehicles/:id` | Remove vehicle *(owner)* |
+| Method | Endpoint | Description | Auth Required |
+|:------:|----------|-------------|:-------------:|
+| `POST` | `/api/booking/check-availability` | Check available cars (`{ location, pickupDate, returnDate }`) | ❌ |
 
 </details>
 
 <details>
-<summary><strong>📅 Bookings</strong></summary>
+<summary><strong>📅 Bookings (<code>/api/booking</code>)</strong></summary>
 
 <br/>
 
-| Method | Endpoint | Description |
-|:------:|----------|-------------|
-| `GET` | `/api/bookings` | Get user's bookings |
-| `POST` | `/api/bookings` | Create a booking |
-| `PATCH` | `/api/bookings/:id` | Update booking status *(owner/admin)* |
-| `DELETE` | `/api/bookings/:id` | Cancel a booking |
+| Method | Endpoint | Description | Auth Required |
+|:------:|----------|-------------|:-------------:|
+| `POST` | `/api/booking/create` | Reserve vehicle (`{ car, pickupDate, returnDate }`) | ✅ |
+| `GET` | `/api/booking/user` | Fetch active user's bookings | ✅ |
+| `GET` | `/api/booking/owner` | Fetch reservations made on owner's cars | ✅ *(Owner)* |
+| `POST` | `/api/booking/change-status` | Confirm or decline booking (`{ bookingId, status }`) | ✅ *(Owner)* |
 
 </details>
 
 <details>
-<summary><strong>⭐ Reviews</strong></summary>
+<summary><strong>👑 Host & Fleet Operations (<code>/api/owner</code>)</strong></summary>
 
 <br/>
 
-| Method | Endpoint | Description |
-|:------:|----------|-------------|
-| `GET` | `/api/vehicles/:id/reviews` | Get reviews for a vehicle |
-| `POST` | `/api/vehicles/:id/reviews` | Add a review |
+| Method | Endpoint | Description | Auth Required |
+|:------:|----------|-------------|:-------------:|
+| `POST` | `/api/owner/change-role` | Upgrade current user role to `owner` | ✅ |
+| `POST` | `/api/owner/add-car` | Add vehicle with image (multipart: `image`, `carData` JSON) | ✅ |
+| `GET` | `/api/owner/cars` | Fetch all vehicles listed by the host | ✅ |
+| `POST` | `/api/owner/toggle-car` | Toggle vehicle availability on/off (`{ carId }`) | ✅ |
+| `POST` | `/api/owner/delete-car` | Permanently remove car listing (`{ carId }`) | ✅ |
+| `GET` | `/api/owner/dashboard` | Fleet analytics (revenue, bookings count, recent rides) | ✅ *(Owner)* |
 
 </details>
 
@@ -204,30 +196,34 @@ cd client && npm start
 ```
 rydely/
 │
-├── 📂 client/                    # ⚛️  React Frontend
+├── 📂 frontend/                  # ⚛️ React 19 + Vite 6 + Tailwind 4
 │   ├── public/
-│   └── src/
-│       ├── components/           #     Reusable UI components
-│       ├── pages/                #     Page-level views
-│       ├── services/             #     API service layer
-│       ├── context/              #     React context providers
-│       ├── hooks/                #     Custom hooks
-│       ├── utils/                #     Helper utilities
-│       └── App.js                #     Root component
-│
-├── 📂 server/                    # 🟢 Node.js/Express Backend
-│   ├── prisma/
-│   │   ├── schema.prisma         #     Database schema
-│   │   ├── migrations/           #     DB migrations
-│   │   └── seed.js               #     Database seeder
 │   ├── src/
-│   │   ├── controllers/          #     Route handlers
-│   │   ├── middleware/           #     Auth & validation
-│   │   ├── routes/               #     Route definitions
-│   │   ├── services/             #     Business logic
-│   │   ├── utils/                #     Helpers
-│   │   └── index.js              #     Entry point
-│   └── .env                      #     Environment config
+│   │   ├── assets/               #     3D models, textures, images, video backgrounds
+│   │   ├── components/           #     CarCard, Navbar, 3D Canvas, Preloader, Hero
+│   │   ├── context/              #     AuthContext (session, login, token management)
+│   │   ├── data/                 #     Supported cities (canonical search mapping)
+│   │   ├── pages/                #     Home, Cars, CarDetails, Profile, ListYourCar
+│   │   │   └── owner/            #     Host HQ: Dashboard, Fleet Manager, Bookings
+│   │   ├── services/             #     Centralized apiRequest, carMapper & API modules
+│   │   ├── App.jsx               #     Router configuration & Global Layout
+│   │   └── main.jsx              #     Vite entry point
+│   ├── .env.example
+│   └── package.json
+│
+├── 📂 backend/                   # 🟢 Express 5 + MongoDB + Mongoose
+│   ├── configs/                  #     Database connection (db.js) & ImageKit (imagekit.js)
+│   ├── controllers/              #     userController, bookingController, ownerController
+│   ├── middleware/               #     auth.js (raw JWT validation), multer.js
+│   ├── models/                   #     Mongoose schemas (User, Car, Booking)
+│   ├── routes/                   #     userRoutes, bookingRoutes, ownerRoutes
+│   ├── utils/                    #     checkAvailability helper
+│   ├── server.js                 #     Express server entry point
+│   └── package.json
+│
+├── 📂 docs/                      # 📑 Project Documentation
+│   ├── api.md                    #     Detailed backend API contract & specifications
+│   └── database.md               #     Database schemas & relationships
 │
 └── 📄 README.md
 ```
@@ -236,32 +232,18 @@ rydely/
 
 ## 🤝 Contributing
 
-We love contributions! Here's how to get involved:
-
+```bash
+1. Fork the repo 🍴
+2. Create your feature branch    →  git checkout -b feature/awesome-feature
+3. Commit your changes          →  git commit -m 'feat: Add awesome feature'
+4. Push to the branch           →  git push origin feature/awesome-feature
+5. Open a Pull Request          →  🎉
 ```
-1. Fork it 🍴
-2. Create your branch    →  git checkout -b feature/awesome-thing
-3. Commit changes        →  git commit -m 'Add awesome thing'
-4. Push to branch        →  git push origin feature/awesome-thing
-5. Open a Pull Request   →  🎉
-```
-
-> **Please** follow the existing code style, write meaningful commits, and add tests where applicable.
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
-
----
+Distributed under the **MIT License**.
 
 <div align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=6C63FF&height=100&section=footer" width="100%"/>
-
-**Built with ❤️ by [Ujjain gang](https://github.com/resmanth)**
-
-⭐ Star this repo if you found it helpful!
-
-</div>

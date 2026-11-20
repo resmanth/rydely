@@ -1,4 +1,5 @@
 import CarDetails from './pages/CarDetails';
+import ListYourCar from './pages/ListYourCar';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
@@ -12,6 +13,7 @@ import HowItWorks from './pages/HowItWorks';
 import About from './pages/About';
 import Login from './pages/Login';
 import Preloader from './components/Preloader';
+import { AuthProvider } from './context/AuthContext';
 
 const AppLayout = () => {
   const location = useLocation();
@@ -59,7 +61,7 @@ const AppLayout = () => {
               </div>
             }
           />
-          <Route path="/offer-ride" element={<HowItWorks />} />
+          <Route path="/offer-ride" element={<ListYourCar />} />
           <Route
             path="/profile"
             element={
@@ -112,7 +114,9 @@ const App = () => {
 
   return (
     <Router>
-      <AppLayout />
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
     </Router>
   );
 };

@@ -1,370 +1,255 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const renterSteps = [
+  {
+    number: '01',
+    icon: '🔎',
+    title: 'Find your ride',
+    text: 'Explore cars by city, category, price and features. Choose the vehicle that fits your journey.',
+  },
+  {
+    number: '02',
+    icon: '🪪',
+    title: 'Get verified',
+    text: 'Complete the required identity and driving licence verification before your booking.',
+  },
+  {
+    number: '03',
+    icon: '🔑',
+    title: 'Pick up your car',
+    text: 'Choose an available pickup or delivery option and review the vehicle condition with the host.',
+  },
+  {
+    number: '04',
+    icon: '🛣️',
+    title: 'Enjoy the drive',
+    text: 'Hit the road, follow the rental terms and return the car at the agreed time and location.',
+  },
+];
+
+const hostSteps = [
+  {
+    number: '01',
+    icon: '🚘',
+    title: 'Add your vehicle',
+    text: 'Share your car details, registration information and clear photos so renters know what to expect.',
+  },
+  {
+    number: '02',
+    icon: '💸',
+    title: 'Set your price',
+    text: 'Choose your daily rental price, availability and preferred pickup arrangements.',
+  },
+  {
+    number: '03',
+    icon: '🤝',
+    title: 'Connect with renters',
+    text: 'Review booking requests and coordinate a smooth handover with verified renters.',
+  },
+  {
+    number: '04',
+    icon: '📈',
+    title: 'Earn from your car',
+    text: 'Make your vehicle work for you whenever it is available. Keep track of your listings and bookings.',
+  },
+];
+
+const faqs = [
+  {
+    q: 'How do I book a car?',
+    a: 'Browse the available cars, open the vehicle you like, select your trip dates and follow the booking process.',
+  },
+  {
+    q: 'Can I choose where to pick up the car?',
+    a: 'Pickup and delivery options depend on the individual vehicle listing. Check the details before booking.',
+  },
+  {
+    q: 'How do I list my car?',
+    a: 'Visit the List Your Car page, review the requirements and follow the listing process.',
+  },
+  {
+    q: 'Can I control when my car is available?',
+    a: 'Yes. Vehicle availability should be managed through the dates and availability options provided for your listing.',
+  },
+  {
+    q: 'Where can I get help?',
+    a: 'Visit our Contact page for support with bookings, listings or other questions.',
+  },
+];
+
 const HowItWorks = () => {
-  const [activeTab, setActiveTab] = useState('renter'); // 'renter' | 'host'
-  const [carType, setCarType] = useState('mid-suv'); // 'sedan' | 'mid-suv' | 'premium'
-  const [daysPerMonth, setDaysPerMonth] = useState(12);
+  const [activeTab, setActiveTab] = useState('renter');
+  const [openFaq, setOpenFaq] = useState(0);
 
-  // Earnings calculation
-  const dailyRates = {
-    sedan: 1800,
-    'mid-suv': 3200,
-    premium: 4500,
-  };
-  const estimatedMonthly = dailyRates[carType] * daysPerMonth;
-
-  const renterSteps = [
-    {
-      num: '01',
-      title: 'Find Your Ideal Car',
-      subtitle: 'Filter by city, vehicle type, and doorstep delivery',
-      desc: 'Browse hundreds of verified cars listed by local owners across Mumbai, Bengaluru, Delhi NCR, Pune, Goa & more. From rugged Thar 4x4s to luxury Innova Hycross hybrids, choose the exact car you want to drive.',
-      icon: '🔍',
-    },
-    {
-      num: '02',
-      title: '60-Second DigiLocker KYC',
-      subtitle: 'Fast, paperless identity & Driving License verification',
-      desc: 'Verify your identity instantly using government-backed DigiLocker. No physical paperwork, no lengthy waiting times, and zero security deposit hassles. Once approved, you can book any car instantly.',
-      icon: '🛡️',
-    },
-    {
-      num: '03',
-      title: 'Doorstep Delivery or Local Pickup',
-      subtitle: 'Meet the host or have the car delivered to your address',
-      desc: 'Have the car delivered directly to your home, office, or airport arrival terminal, or meet the host at a convenient local landmark. Do a quick 2-minute condition walkthrough on the app, take the keys, and set off.',
-      icon: '🔑',
-    },
-    {
-      num: '04',
-      title: 'Drive with Complete Freedom',
-      subtitle: '₹20 Lakh insurance coverage on every trip',
-      desc: 'Enjoy your road trip with 24/7 roadside assistance and comprehensive damage cover. FASTag expressway tolls and fuel are settled transparently via UPI upon trip completion.',
-      icon: '🛣️',
-    },
-  ];
-
-  const hostSteps = [
-    {
-      num: '01',
-      title: 'List Your Car in 5 Minutes',
-      subtitle: 'Share your vehicle details, RC, and photos',
-      desc: 'Enter your car make, model, registration number, and clear photos. Set your own daily rental price, daily kilometer limit, and choose your preferred pickup locations.',
-      icon: '📝',
-    },
-    {
-      num: '02',
-      title: 'Maintain 100% Calendar Control',
-      subtitle: 'Rent it out only when you do not need it',
-      desc: 'Block out dates when you need your car for personal use. Set availability for weekdays while you work from home, or for periods when you are traveling out of town.',
-      icon: '📅',
-    },
-    {
-      num: '03',
-      title: 'Safe Handover to Verified Drivers',
-      subtitle: 'All renters are Aadhaar & Driving License verified',
-      desc: 'Rest easy knowing only identity-checked, licensed drivers can book your car. Rydely provides ₹20 Lakh comprehensive insurance and GPS tracking for complete vehicle protection.',
-      icon: '🤝',
-    },
-    {
-      num: '04',
-      title: 'Get Paid Directly to Your Bank',
-      subtitle: 'Instant UPI payouts after every completed rental',
-      desc: 'Your rental earnings are deposited directly into your bank account via UPI within hours of trip completion. Offset your car EMIs, insurance, and maintenance effortlessly.',
-      icon: '💰',
-    },
-  ];
-
-  const faqs = [
-    {
-      q: 'Is my car safe when I rent it out to someone?',
-      a: 'Yes, 100%. Every single driver must pass a mandatory DigiLocker Aadhaar & Driving License background check before booking. Additionally, every rental is protected by a ₹20 Lakh comprehensive insurance policy covering accidental damage and third-party liabilities.',
-    },
-    {
-      q: 'Do renters need to pay a heavy security deposit?',
-      a: 'Unlike traditional rental agencies that block ₹10,000–₹25,000 on your credit card, Rydely uses algorithmic risk scoring and DigiLocker KYC to offer zero-deposit rentals on verified profiles.',
-    },
-    {
-      q: 'What is the fuel and FASTag policy?',
-      a: 'Cars are provided with a full or documented fuel level and preloaded FASTag. Renters simply return the car with the same fuel level, and toll expenses incurred during the trip are settled automatically via UPI.',
-    },
-    {
-      q: 'How much can I earn as a car owner (host)?',
-      a: 'Hosts renting out mid-size SUVs (like Creta or Thar) typically earn ₹35,000–₹50,000 per month by sharing their vehicle for 10–14 days. Premium 7-seaters like Innova Hycross or XUV700 earn upwards of ₹65,000–₹85,000/month.',
-    },
-    {
-      q: 'What if the car breaks down during a trip?',
-      a: 'Every Rydely rental includes 24/7 National Roadside Assistance (RSA) across all Indian National Highways and cities. Our support team dispatches a service technician immediately or arranges an alternative vehicle.',
-    },
-  ];
+  const steps = activeTab === 'renter' ? renterSteps : hostSteps;
 
   return (
-    <div className="min-h-screen bg-[#070404] text-white font-['Outfit'] pt-24 sm:pt-28 pb-16">
-      
-      {/* ── Page Header Hero ── */}
-      <section className="relative px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center mb-16">
-        {/* Crimson Ambient Glow */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none"
+    <div className="min-h-screen bg-[#080607] text-white pt-28 pb-20">
+      {/* HERO */}
+      <section className="relative overflow-hidden px-5 pb-20 pt-12">
+        <div className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(220, 38, 38, 0.22) 0%, transparent 70%)',
-            filter: 'blur(50px)',
+            background:
+              'radial-gradient(ellipse at 50% 0%, rgba(220,38,38,.22), transparent 60%)',
           }}
         />
 
-        <div className="relative z-10">
-          <span className="inline-block text-xs font-bold tracking-widest uppercase text-red-400 mb-3 px-3.5 py-1 rounded-full bg-red-950/60 border border-red-500/30">
-            🇮🇳 Peer-to-Peer Car Sharing
+        <div className="relative max-w-5xl mx-auto text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[.2em] text-red-300">
+            The Rydely experience
           </span>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white mb-4">
-            How Rydely Works
-          </h1>
-          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Whether you want to rent a verified self-drive car or earn monthly passive income from your parked vehicle, Rydely makes car sharing simple, safe, and transparent.
-          </p>
 
-          {/* Mode Switcher Tabs */}
-          <div className="inline-flex items-center bg-zinc-900/90 border border-zinc-800 p-1.5 rounded-2xl mt-8 shadow-xl">
-            <button
-              type="button"
-              onClick={() => setActiveTab('renter')}
-              className={`px-6 sm:px-8 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                activeTab === 'renter'
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-600/35'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span>🚗</span>
-              <span>I Want to Rent a Car</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('host')}
-              className={`px-6 sm:px-8 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                activeTab === 'host'
-                  ? 'bg-red-600 text-white shadow-lg shadow-red-600/35'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span>💼</span>
-              <span>I Want to List My Car (Host)</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Step-by-Step Flow ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {(activeTab === 'renter' ? renterSteps : hostSteps).map((s) => (
-            <div
-              key={s.num}
-              className="bg-zinc-950/80 hover:bg-zinc-900/90 border border-red-950/50 hover:border-red-500/40 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 shadow-xl hover:-translate-y-1 group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-3xl">{s.icon}</span>
-                  <span className="font-mono text-xs font-black text-red-500 bg-red-950/50 border border-red-500/30 px-2.5 py-1 rounded-full">
-                    STEP {s.num}
-                  </span>
-                </div>
-
-                <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors mb-1.5">
-                  {s.title}
-                </h3>
-                <p className="text-xs font-semibold text-slate-400 mb-3">
-                  {s.subtitle}
-                </p>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal">
-                  {s.desc}
-                </p>
-              </div>
-
-              <div className="pt-4 mt-4 border-t border-zinc-800/60 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                <span>✓</span>
-                <span>Verified Safe & Instant</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Interactive Host Earnings Calculator (Visible in Host Tab or as preview) ── */}
-      <section id="calculator" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
-        <div className="bg-gradient-to-r from-zinc-950 via-red-950/40 to-zinc-950 border border-red-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-          
-          <div className="text-center max-w-xl mx-auto mb-8">
-            <span className="text-xs font-mono font-bold tracking-widest uppercase text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-500/30">
-              Host Calculator
+          <h1 className="mt-7 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.05]">
+            Your journey.
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-500 to-red-600">
+              Your way.
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-3 mb-2">
-              Calculate Your Monthly Car Earnings
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
-              See how much your idle car can generate when listed for self-drive rent.
-            </p>
+          </h1>
+
+          <p className="max-w-2xl mx-auto mt-6 text-sm sm:text-lg leading-relaxed text-zinc-400">
+            A simpler way to share cars. Find a ride for your next adventure
+            or turn your parked car into an opportunity.
+          </p>
+
+          <div className="mt-9 inline-flex rounded-2xl border border-white/10 bg-white/[0.04] p-1.5">
+            <button
+              onClick={() => setActiveTab('renter')}
+              className={`rounded-xl px-5 sm:px-8 py-3 text-xs sm:text-sm font-bold transition-all ${
+                activeTab === 'renter'
+                  ? 'bg-red-600 text-white shadow-lg shadow-red-900/40'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              I want to rent
+            </button>
+            <button
+              onClick={() => setActiveTab('host')}
+              className={`rounded-xl px-5 sm:px-8 py-3 text-xs sm:text-sm font-bold transition-all ${
+                activeTab === 'host'
+                  ? 'bg-red-600 text-white shadow-lg shadow-red-900/40'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              I want to host
+            </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            {/* Controls */}
-            <div className="space-y-6">
-              {/* Car Type Selector */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Select Your Car Category
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCarType('sedan')}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                      carType === 'sedan'
-                        ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30'
-                        : 'bg-zinc-900 border-zinc-800 text-slate-300 hover:border-zinc-700'
-                    }`}
-                  >
-                    <span className="block text-sm font-bold">Hatch / Sedan</span>
-                    <span className="block text-[10px] text-red-200">~₹1,800/d</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setCarType('mid-suv')}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                      carType === 'mid-suv'
-                        ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30'
-                        : 'bg-zinc-900 border-zinc-800 text-slate-300 hover:border-zinc-700'
-                    }`}
-                  >
-                    <span className="block text-sm font-bold">SUV / Thar</span>
-                    <span className="block text-[10px] text-red-200">~₹3,200/d</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setCarType('premium')}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                      carType === 'premium'
-                        ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30'
-                        : 'bg-zinc-900 border-zinc-800 text-slate-300 hover:border-zinc-700'
-                    }`}
-                  >
-                    <span className="block text-sm font-bold">Luxury / Hycross</span>
-                    <span className="block text-[10px] text-red-200">~₹4,500/d</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Days Slider */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Days Rented Per Month
-                  </span>
-                  <span className="text-sm font-black text-red-400 bg-red-950/60 px-2.5 py-0.5 rounded-full border border-red-500/30">
-                    {daysPerMonth} Days
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="2"
-                  max="28"
-                  value={daysPerMonth}
-                  onChange={(e) => setDaysPerMonth(Number(e.target.value))}
-                  className="w-full accent-red-600 cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                  <span>2 days (weekends only)</span>
-                  <span>14 days</span>
-                  <span>28 days (full month)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Results Display Box */}
-            <div className="bg-zinc-900/90 border border-red-500/30 rounded-2xl p-6 sm:p-8 text-center flex flex-col justify-between">
-              <div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 block mb-1">
-                  Estimated Monthly Income
-                </span>
-                <div className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-red-100 to-red-400 drop-shadow-[0_0_20px_rgba(255,53,53,0.4)]">
-                  ₹{estimatedMonthly.toLocaleString('en-IN')}
-                </div>
-                <span className="text-[11px] text-emerald-400 font-semibold block mt-2">
-                  ✓ Covers monthly EMI, service, and insurance
-                </span>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-zinc-800">
-                <Link
-                  to="/offer-ride"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-red-600/30 active:scale-95"
-                >
-                  <span>List Your Car & Start Earning</span>
-                  <span>→</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-
         </div>
       </section>
 
-      {/* ── FAQ Section ── */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="text-center mb-12">
-          <span className="text-xs font-mono font-bold tracking-widest uppercase text-red-400">
-            Got Questions?
-          </span>
-          <h2 className="text-3xl font-extrabold text-white mt-2">
-            Frequently Asked Questions
-          </h2>
+      {/* STEPS */}
+      <section className="max-w-7xl mx-auto px-5">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-9">
+          <div>
+            <p className="text-xs uppercase tracking-[.2em] text-red-400 font-bold">
+              {activeTab === 'renter' ? 'For renters' : 'For car owners'}
+            </p>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold">
+              {activeTab === 'renter'
+                ? 'Four steps to your next drive.'
+                : 'Four steps to start hosting.'}
+            </h2>
+          </div>
+          <p className="max-w-sm text-sm text-zinc-500">
+            {activeTab === 'renter'
+              ? 'From discovering a car to getting behind the wheel.'
+              : 'From creating your listing to managing your rentals.'}
+          </p>
         </div>
 
-        <div className="space-y-4">
-          {faqs.map((f, i) => (
-            <div
-              key={i}
-              className="bg-zinc-950/80 border border-zinc-900 rounded-2xl p-6 transition-all hover:border-red-500/30"
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {steps.map((step) => (
+            <article
+              key={step.number}
+              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900 to-[#100b0c] p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1 hover:border-red-500/40"
             >
-              <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                <span className="text-red-500 font-mono">Q.</span> {f.q}
-              </h3>
-              <p className="text-sm text-slate-400 leading-relaxed font-normal pl-6">
-                {f.a}
-              </p>
+              <div className="flex justify-between items-start">
+                <span className="text-3xl">{step.icon}</span>
+                <span className="font-mono text-xs text-red-400/80">
+                  {step.number}
+                </span>
+              </div>
+              <div className="mt-12">
+                <h3 className="text-xl font-bold">{step.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                  {step.text}
+                </p>
+              </div>
+              <div className="absolute bottom-0 left-0 h-1 w-0 bg-red-600 transition-all duration-300 group-hover:w-full" />
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURE STRIP */}
+      <section className="max-w-7xl mx-auto px-5 mt-24">
+        <div className="grid md:grid-cols-3 gap-4">
+          {[
+            ['01', 'More choice', 'Explore different cars for different kinds of journeys.'],
+            ['02', 'More control', 'Choose the vehicle, dates and arrangements that work for you.'],
+            ['03', 'One platform', 'Discover, book and manage your car-sharing experience in one place.'],
+          ].map(([number, title, text]) => (
+            <div key={number} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <span className="text-xs font-mono text-red-400">{number}</span>
+              <h3 className="mt-4 text-lg font-bold">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">{text}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Bottom Call to Action ── */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="bg-gradient-to-r from-red-950/80 via-red-900/60 to-rose-950/80 border border-red-500/40 rounded-3xl p-8 sm:p-12 shadow-2xl">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white mb-3">
-            Ready to Experience Peer-to-Peer Mobility?
-          </h2>
-          <p className="text-sm text-slate-300 max-w-xl mx-auto mb-6">
-            Join thousands of verified owners and travelers across India. Rent a self-drive car or list your vehicle in minutes.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/cars"
-              className="w-full sm:w-auto px-8 py-3.5 bg-white hover:bg-slate-100 text-slate-950 font-bold rounded-xl text-sm transition-all shadow-lg active:scale-95"
-            >
-              Browse Cars for Rent
-            </Link>
-            <Link
-              to="/offer-ride"
-              className="w-full sm:w-auto px-8 py-3.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-red-600/30 active:scale-95"
-            >
-              List Your Car
-            </Link>
-          </div>
+      {/* FAQ */}
+      <section className="max-w-4xl mx-auto px-5 mt-24">
+        <div className="text-center mb-10">
+          <p className="text-xs font-bold uppercase tracking-[.2em] text-red-400">Need clarity?</p>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold">Frequently asked questions</h2>
+        </div>
+
+        <div className="space-y-3">
+          {faqs.map((faq, index) => (
+            <div key={faq.q} className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+              <button
+                onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
+                className="w-full flex items-center justify-between gap-4 p-5 text-left"
+              >
+                <span className="text-sm sm:text-base font-semibold">{faq.q}</span>
+                <span className={`text-xl text-red-400 transition-transform ${openFaq === index ? 'rotate-45' : ''}`}>
+                  +
+                </span>
+              </button>
+              {openFaq === index && (
+                <p className="px-5 pb-5 text-sm leading-relaxed text-zinc-400">
+                  {faq.a}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
+      {/* CTA */}
+      <section className="max-w-6xl mx-auto px-5 mt-24">
+        <div className="relative overflow-hidden rounded-[2rem] border border-red-500/30 bg-gradient-to-br from-red-950 via-[#250b10] to-zinc-950 px-7 py-12 sm:px-12 sm:py-16 text-center">
+          <div className="absolute w-72 h-72 rounded-full bg-red-600/20 blur-[100px] -top-32 left-1/2 -translate-x-1/2" />
+          <div className="relative">
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-red-300">Make your move</p>
+            <h2 className="mt-4 text-3xl sm:text-5xl font-black">Ready to get going?</h2>
+            <p className="max-w-xl mx-auto mt-4 text-sm sm:text-base text-zinc-300">
+              Find your next ride or share your car with the Rydely community.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+              <Link to="/cars" className="rounded-xl bg-white px-7 py-3.5 text-sm font-bold text-black hover:bg-zinc-200 transition">
+                Explore cars
+              </Link>
+              <Link to="/offer-ride" className="rounded-xl bg-red-600 px-7 py-3.5 text-sm font-bold text-white hover:bg-red-500 transition">
+                List your car
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

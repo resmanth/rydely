@@ -1,3 +1,4 @@
+import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import carLogo from '../assets/carlogo.png';
@@ -5,6 +6,7 @@ import carLogo from '../assets/carlogo.png';
 const Login = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { login, register } = useAuth();
   const urlMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const [mode, setMode] = useState(urlMode);
   const [prevUrlMode, setPrevUrlMode] = useState(urlMode);
@@ -26,27 +28,40 @@ const Login = () => {
     setError('');
   }
 
-  const handleSubmit = (e) => {
+
+const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (mode === 'signup') {
-      if (!name.trim()) return setError('Full name is required');
-      if (!phone.trim()) return setError('Phone number is required');
-      if (password !== confirmPassword) return setError('Passwords do not match');
-      if (!agreedToTerms) return setError('Please agree to the terms & conditions');
+        if (!name.trim()) return setError('Full name is required');
+        if (!phone.trim()) return setError('Phone number is required');
+        if (password !== confirmPassword) return setError('Passwords do not match');
+        if (!agreedToTerms) return setError('Please agree to the terms & conditions');
     }
 
     if (!email.trim()) return setError('Email is required');
-    if (!password.trim() || password.length < 6) return setError('Password must be at least 6 characters');
+    if (!password.trim() || password.length < 8) {
+        return setError('Password must be at least 8 characters');
+    }
 
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/');
-    }, 1200);
-  };
+
+    try {
+        if (mode === 'signup') {
+            await register(name.trim(), email.trim(), password);
+        } else {
+            await login(email.trim(), password);
+        }
+
+        navigate('/');
+    } catch (err) {
+        setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+        setIsLoading(false);
+    }
+};
+
 
   const isSignUp = mode === 'signup';
 

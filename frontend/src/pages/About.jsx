@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
+import member1Img from '../assets/member1.jpeg';
+import member2Img from '../assets/member2.jpeg';
+import member3Img from '../assets/member3.jpeg';
+import member4Img from '../assets/member4.png';
 
 /**
  * Team Members Data
- * Replace image URLs with your local images when ready
- * (e.g. import member1Img from '../assets/member1.jpg')
+ * Official team member photos loaded directly from assets
  */
 const teamMembers = [
   {
@@ -13,7 +16,7 @@ const teamMembers = [
     badge: 'VISION & STRATEGY',
     bio: 'Passionate about unlocking India’s mobility infrastructure. Leading product architecture, host monetization programs, and expansion across National Highway corridors.',
     tags: ['Product Vision', 'Host Ecosystem', 'Growth Strategy'],
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+    image: member1Img,
     social: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -22,12 +25,12 @@ const teamMembers = [
   },
   {
     id: 2,
-    name: 'Co-Founder / Member 2',
+    name: 'Suryanshu Tiwari',
     role: 'Chief Technology Officer',
     badge: 'ENGINEERING & ARCHITECTURE',
     bio: 'Architecting scalable cloud microservices, DigiLocker automated KYC pipelines, real-time telematics matching, and frictionless instant UPI settlements.',
     tags: ['Full-Stack Cloud', 'DigiLocker KYC', 'System Security'],
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+    image: member2Img,
     social: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -36,12 +39,12 @@ const teamMembers = [
   },
   {
     id: 3,
-    name: 'Co-Founder / Member 3',
+    name: 'Gagandeep',
     role: 'Head of Product & Design',
     badge: 'PRODUCT & EXPERIENCE',
     bio: 'Crafting intuitive automotive booking interfaces, 3D interactive scrollytelling mechanics, and high-conversion flows for both self-drive guests and private car hosts.',
     tags: ['UI/UX Design', '3D Scrollytelling', 'User Research'],
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
+    image: member3Img,
     social: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -50,12 +53,12 @@ const teamMembers = [
   },
   {
     id: 4,
-    name: 'Co-Founder / Member 4',
+    name: 'Resmanth kumar beesetti',
     role: 'Head of Operations & Trust',
     badge: 'OPERATIONS & SAFETY',
     bio: 'Managing vehicle onboarding standards, ₹20 Lakh damage insurance partnerships, 24/7 National Highway roadside assistance, and customer happiness across 15+ cities.',
     tags: ['Fleet Operations', 'Insurance Partnerships', 'Trust & Safety'],
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
+    image: member4Img,
     social: {
       linkedin: 'https://linkedin.com',
       twitter: 'https://twitter.com',
@@ -249,7 +252,7 @@ const About = () => {
                       <img
                         src={member.image}
                         alt={member.name}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
                       {/* Gradient Vignette over photo base */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -32,59 +32,68 @@ const CarDetails = () => {
     const pickupISO = `${pickupDate}T${pickupTime}`;
     const returnISO = `${returnDate}T${returnTime}`;
 
-    // Try to load the car from router state → sessionStorage → API
-    const loadCar = useCallback(async () => {
-        // 1. Router state (passed from Cars page)
-        if (location.state?.car) {
-            setCar(location.state.car);
-            setLoading(false);
-            return;
-        }
+    useEffect(() => {
+        let isCancelled = false;
 
-        // 2. sessionStorage cache
-        try {
-            const cached = sessionStorage.getItem(`rydely-car-${id}`);
-            if (cached) {
-                setCar(JSON.parse(cached));
-                setLoading(false);
+        const executeLoad = async () => {
+            if (location.state?.car) {
+                if (!isCancelled) {
+                    setCar(location.state.car);
+                    setLoading(false);
+                }
                 return;
             }
-        } catch { /* ignore */ }
 
-        // 3. Fetch from API (all cities, find by _id)
-        setLoading(true);
-        try {
-            const cities = allCityValues();
-            const results = await Promise.allSettled(
-                cities.map((c) =>
-                    carsApi.checkAvailability({
-                        location: c,
-                        pickupDate: pickupISO,
-                        returnDate: returnISO,
-                    })
-                )
-            );
-            let found = null;
-            for (const r of results) {
-                if (r.status === 'fulfilled' && r.value.availableCars) {
-                    const match = r.value.availableCars.find((c) => c._id === id);
-                    if (match) {
-                        found = mapCar(match);
-                        break;
+            try {
+                const cached = sessionStorage.getItem(`rydely-car-${id}`);
+                if (cached && !isCancelled) {
+                    setCar(JSON.parse(cached));
+                    setLoading(false);
+                    return;
+                }
+            } catch { /* ignore */ }
+
+            try {
+                const cities = allCityValues();
+                const results = await Promise.allSettled(
+                    cities.map((city) =>
+                        carsApi.checkAvailability({
+                            location: city,
+                            pickupDate: pickupISO,
+                            returnDate: returnISO,
+                        })
+                    )
+                );
+                let foundCar = null;
+                for (const result of results) {
+                    if (result.status === 'fulfilled' && result.value?.availableCars) {
+                        const match = result.value.availableCars.find((carItem) => carItem._id === id);
+                        if (match) {
+                            foundCar = mapCar(match);
+                            break;
+                        }
                     }
                 }
+                if (!isCancelled) {
+                    setCar(foundCar);
+                }
+            } catch {
+                if (!isCancelled) {
+                    setCar(null);
+                }
+            } finally {
+                if (!isCancelled) {
+                    setLoading(false);
+                }
             }
-            setCar(found);
-        } catch {
-            setCar(null);
-        } finally {
-            setLoading(false);
-        }
-    }, [id, location.state, pickupISO, returnISO]);
+        };
 
-    useEffect(() => {
-        loadCar();
-    }, [loadCar]);
+        executeLoad();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [id, location.state, pickupISO, returnISO]);
 
     // Loading state
     if (loading) {

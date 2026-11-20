@@ -1,78 +1,183 @@
+// ============================================================
+// FeaturedVehicles.jsx — Scrollytelling Top Vehicles Showcase
+// ------------------------------------------------------------
+// This section displays top listed rental vehicles on the homepage.
+//
+// Dynamic Data Pipeline:
+//   - Fetches live listed cars from the backend availability API
+//     (using checkAvailability across configured cities).
+//   - If listed cars exist in the database, maps the first 4 real
+//     cars (e.g. Mahindra XUV700, Hyundai Aura, Ertiga, Alto, etc.)
+//     into the 4 cards.
+//   - Falls back gracefully to curated default vehicles if the database
+//     is empty or the server is starting up.
+//
+// Layout Architecture:
+//   - 3-Column Grid on desktop:
+//       Left 2 cards (Cards 01 & 02)
+//       Center `#car-slot-2` (docking target for the 3D top-down car)
+//       Right 2 cards (Cards 03 & 04)
+// ============================================================
+
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { carsApi } from '../services/api';
+import { mapCar } from '../services/carMapper';
+import { allCityValues } from '../data/cities';
 import innovaImg from '../assets/cars/toyota-offer.png';
 import safariImg from '../assets/cars/toyota-offer-2.png';
 import xuvImg from '../assets/cars/bmw-offer.png';
 import tharImg from '../assets/cars/nissan-offer.png';
 
-const leftCards = [
+// Fallback curated vehicles (used only if database has fewer than 4 listed cars)
+const fallbackVehicles = [
   {
     num: '01',
+    id: 'fallback-1',
     title: 'Mahindra XUV700 AX7L',
     subtitle: 'mStallion Turbo · 200 PS · Automatic',
-    location: 'Mumbai · Bandra & BKC',
+    location: 'Delhi NCR',
     img: xuvImg,
     desc: 'Flagship 7-seater SUV with panoramic Skyroof, Level-2 ADAS, and Sony 3D audio. Perfect for family outstation trips and business travel.',
     specs: [
       { label: 'Transmission', val: 'Automatic' },
-      { label: 'Daily Rate', val: '₹3,499 / day' },
-      { label: 'Free KMs', val: '300 km / day' },
-      { label: 'Host Rating', val: '4.96 ★ (38 trips)' },
+      { label: 'Daily Rate', val: '₹3,500 / day' },
+      { label: 'Fuel', val: 'Petrol' },
+      { label: 'Seating', val: '5 Seater' },
     ],
   },
   {
     num: '02',
+    id: 'fallback-2',
     title: 'Tata Safari Dark Edition',
     subtitle: 'Kryotec 2.0L Diesel · 170 PS',
-    location: 'Delhi NCR · Cyber City Gurugram',
+    location: 'Delhi NCR',
     img: safariImg,
     desc: 'Built on Land Rover D8 platform with ventilated captain seats, terrain response, and 5-star Bharat NCAP safety. Clean self-drive rental.',
     specs: [
       { label: 'Transmission', val: 'Automatic' },
       { label: 'Daily Rate', val: '₹3,299 / day' },
-      { label: 'Free KMs', val: '250 km / day' },
-      { label: 'Host Rating', val: '4.98 ★ (52 trips)' },
+      { label: 'Fuel', val: 'Diesel' },
+      { label: 'Seating', val: '7 Seater' },
     ],
   },
-];
-
-const rightCards = [
   {
     num: '03',
+    id: 'fallback-3',
     title: 'Toyota Innova Hycross ZX',
     subtitle: 'Self-Charging Hybrid · 186 PS',
-    location: 'Bengaluru · Indiranagar & Airport',
+    location: 'Bengaluru',
     img: innovaImg,
     desc: 'The undisputed king of comfort. Powered ottoman lounge seating, 21.1 km/l hybrid fuel efficiency, whisper-quiet cabin, and zero deposit.',
     specs: [
       { label: 'Transmission', val: 'e-CVT Hybrid' },
       { label: 'Daily Rate', val: '₹3,899 / day' },
-      { label: 'Free KMs', val: 'Unlimited' },
-      { label: 'Host Rating', val: '5.0 ★ (64 trips)' },
+      { label: 'Fuel', val: 'Hybrid' },
+      { label: 'Seating', val: '7 Seater' },
     ],
   },
   {
     num: '04',
+    id: 'fallback-4',
     title: 'Mahindra Thar Earth 4x4',
     subtitle: 'mStallion 4WD · Convertible Soft-Top',
-    location: 'Goa · Panaji & Dabolim Airport',
+    location: 'Goa',
     img: tharImg,
     desc: 'Iconic open-air off-road 4x4 with 226mm ground clearance and shift-on-the-fly 4WD. The most popular self-drive rental for beach and Ghat drives.',
     specs: [
-      { label: 'Drivetrain', val: '4x4 Manual' },
+      { label: 'Transmission', val: 'Manual' },
       { label: 'Daily Rate', val: '₹3,199 / day' },
-      { label: 'Free KMs', val: '350 km / day' },
-      { label: 'Host Rating', val: '4.95 ★ (41 trips)' },
+      { label: 'Fuel', val: 'Diesel' },
+      { label: 'Seating', val: '4 Seater' },
     ],
   },
 ];
 
 const FeaturedVehicles = () => {
+  const [displayVehicles, setDisplayVehicles] = useState(fallbackVehicles);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadListedCars = async () => {
+      try {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayAfter = new Date();
+        dayAfter.setDate(dayAfter.getDate() + 3);
+
+        const pickupDate = `${tomorrow.toISOString().slice(0, 10)}T10:00`;
+        const returnDate = `${dayAfter.toISOString().slice(0, 10)}T18:00`;
+
+        const citiesList = allCityValues();
+        const settledResults = await Promise.allSettled(
+          citiesList.map((city) =>
+            carsApi.checkAvailability({
+              location: city,
+              pickupDate,
+              returnDate,
+            })
+          )
+        );
+
+        const fetchedCars = [];
+        for (const res of settledResults) {
+          if (res.status === 'fulfilled' && res.value?.availableCars) {
+            fetchedCars.push(...res.value.availableCars.map(mapCar));
+          }
+        }
+
+        if (isCancelled || fetchedCars.length === 0) return;
+
+        // Transform real database cars into the featured card format
+        const formattedLiveCars = fetchedCars.slice(0, 4).map((car, index) => {
+          const numberStr = `0${index + 1}`;
+          return {
+            num: numberStr,
+            id: car.id,
+            title: car.name,
+            subtitle: `${car.specs?.find(s => s.label === 'Fuel')?.val || 'Petrol'} · ${car.specs?.find(s => s.label === 'Transmission')?.val || 'Automatic'} · ${car.category?.toUpperCase() || 'SUV'}`,
+            location: car.location,
+            img: car.image || xuvImg,
+            desc: car.description || 'Verified private vehicle available for self-drive rental with comprehensive insurance and zero deposit.',
+            specs: [
+              { label: 'Transmission', val: car.specs?.find(s => s.label === 'Transmission')?.val || 'Manual' },
+              { label: 'Daily Rate', val: `₹${(car.price || 0).toLocaleString('en-IN')} / day` },
+              { label: 'Fuel', val: car.specs?.find(s => s.label === 'Fuel')?.val || 'Petrol' },
+              { label: 'Seating', val: car.specs?.find(s => s.label === 'Seats')?.val || '5 Seater' },
+            ],
+            rawCar: car,
+          };
+        });
+
+        // Fill remaining slots from fallback if fewer than 4 cars in DB
+        while (formattedLiveCars.length < 4) {
+          const fallbackIndex = formattedLiveCars.length;
+          formattedLiveCars.push(fallbackVehicles[fallbackIndex]);
+        }
+
+        setDisplayVehicles(formattedLiveCars);
+      } catch (err) {
+        console.error('Failed to load live listed cars for featured section:', err);
+      }
+    };
+
+    loadListedCars();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const leftCards = displayVehicles.slice(0, 2);
+  const rightCards = displayVehicles.slice(2, 4);
+
   return (
     <section
       id="features-section"
       className="relative min-h-screen py-24 lg:py-32 bg-[#070404] text-white font-['Outfit'] overflow-hidden border-t border-red-950/40"
     >
-      {/* Studio Crimson Lighting Background Glows */}
+      {/* Studio Crimson Radial Lighting Glow */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[750px] pointer-events-none"
         style={{
@@ -84,7 +189,7 @@ const FeaturedVehicles = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
-        {/* Section Header */}
+        {/* --- Section Header --- */}
         <div className="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/60 border border-red-500/30 text-red-400 text-[11px] font-semibold tracking-widest uppercase mb-3 shadow-md shadow-red-950/40">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -98,10 +203,10 @@ const FeaturedVehicles = () => {
           </p>
         </div>
 
-        {/* ── 3-Column Grid: [Left 2 White Cards] | [#car-slot-2 (Top-Down 3D Car)] | [Right 2 White Cards] ── */}
+        {/* ── 3-Column Grid: [Left 2 Cards] | [#car-slot-2 (Top-Down 3D Car Target)] | [Right 2 Cards] ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
 
-          {/* Left Column (Cards 01 & 02) */}
+          {/* Left Column (Vehicles 01 & 02) */}
           <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
             {leftCards.map((car) => (
               <div
@@ -113,16 +218,16 @@ const FeaturedVehicles = () => {
                     <span className="font-mono text-sm font-black tracking-widest text-[#ff3535]">
                       {car.num}
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200 truncate max-w-[200px]">
                       📍 {car.location}
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-red-600 transition-colors mb-0.5">
+                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-red-600 transition-colors mb-0.5 truncate">
                     {car.title}
                   </h3>
 
-                  <p className="text-[11px] font-semibold text-slate-500 mb-2">
+                  <p className="text-[11px] font-semibold text-slate-500 mb-2 truncate">
                     {car.subtitle}
                   </p>
 
@@ -136,27 +241,27 @@ const FeaturedVehicles = () => {
                     />
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2">
                     {car.desc}
                   </p>
                 </div>
 
                 {/* Technical Specs 4-cell Grid */}
                 <div className="grid grid-cols-2 gap-2 py-3 border-t border-slate-100 mb-4 text-left">
-                  {car.specs.map((s) => (
-                    <div key={s.label} className="bg-slate-50 border border-slate-100 rounded-xl p-2">
-                      <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">
-                        {s.label}
+                  {car.specs.map((spec) => (
+                    <div key={spec.label} className="bg-slate-50 border border-slate-100 rounded-xl p-2">
+                      <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold truncate">
+                        {spec.label}
                       </span>
-                      <span className="text-xs font-bold text-slate-900">
-                        {s.val}
+                      <span className="text-xs font-bold text-slate-900 truncate block">
+                        {spec.val}
                       </span>
                     </div>
                   ))}
                 </div>
 
                 <Link
-                  to={`/cars?car=${encodeURIComponent(car.title)}`}
+                  to={car.id?.startsWith('fallback') ? `/cars?car=${encodeURIComponent(car.title)}` : `/cars/${car.id}`}
                   className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all shadow-md hover:shadow-red-500/25 cursor-pointer"
                 >
                   <span>Rent This Car</span>
@@ -166,7 +271,7 @@ const FeaturedVehicles = () => {
             ))}
           </div>
 
-          {/* Center Column: The Target Slot for the Top-Down 3D Car */}
+          {/* Center Column: Scrollytelling Docking Target for Global3DCar (#car-slot-2) */}
           <div className="lg:col-span-4 flex flex-col items-center justify-center order-1 lg:order-2 relative">
             <div
               id="car-slot-2"
@@ -174,7 +279,7 @@ const FeaturedVehicles = () => {
             />
           </div>
 
-          {/* Right Column (Cards 03 & 04) */}
+          {/* Right Column (Vehicles 03 & 04) */}
           <div className="lg:col-span-4 flex flex-col gap-6 order-3">
             {rightCards.map((car) => (
               <div
@@ -186,16 +291,16 @@ const FeaturedVehicles = () => {
                     <span className="font-mono text-sm font-black tracking-widest text-[#ff3535]">
                       {car.num}
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200 truncate max-w-[200px]">
                       📍 {car.location}
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-red-600 transition-colors mb-0.5">
+                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-red-600 transition-colors mb-0.5 truncate">
                     {car.title}
                   </h3>
 
-                  <p className="text-[11px] font-semibold text-slate-500 mb-2">
+                  <p className="text-[11px] font-semibold text-slate-500 mb-2 truncate">
                     {car.subtitle}
                   </p>
 
@@ -209,27 +314,27 @@ const FeaturedVehicles = () => {
                     />
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2">
                     {car.desc}
                   </p>
                 </div>
 
                 {/* Technical Specs 4-cell Grid */}
                 <div className="grid grid-cols-2 gap-2 py-3 border-t border-slate-100 mb-4 text-left">
-                  {car.specs.map((s) => (
-                    <div key={s.label} className="bg-slate-50 border border-slate-100 rounded-xl p-2">
-                      <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">
-                        {s.label}
+                  {car.specs.map((spec) => (
+                    <div key={spec.label} className="bg-slate-50 border border-slate-100 rounded-xl p-2">
+                      <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold truncate">
+                        {spec.label}
                       </span>
-                      <span className="text-xs font-bold text-slate-900">
-                        {s.val}
+                      <span className="text-xs font-bold text-slate-900 truncate block">
+                        {spec.val}
                       </span>
                     </div>
                   ))}
                 </div>
 
                 <Link
-                  to={`/cars?car=${encodeURIComponent(car.title)}`}
+                  to={car.id?.startsWith('fallback') ? `/cars?car=${encodeURIComponent(car.title)}` : `/cars/${car.id}`}
                   className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all shadow-md hover:shadow-red-500/25 cursor-pointer"
                 >
                   <span>Rent This Car</span>
@@ -241,7 +346,7 @@ const FeaturedVehicles = () => {
 
         </div>
 
-        {/* Explore All Rental Cars Action */}
+        {/* --- Explore Full Catalog Call-to-Action --- */}
         <div className="mt-14 text-center">
           <Link
             to="/cars"

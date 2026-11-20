@@ -1,3 +1,17 @@
+// ============================================================
+// Login.jsx — Unified Authentication Portal (Sign In & Sign Up)
+// ------------------------------------------------------------
+// This page handles both renter & host authentication:
+//   - Toggle between 'signin' and 'signup' modes
+//   - URL search parameter sync (`?mode=signup` or `?mode=signin`)
+//   - Sign Up: collects Full Name, Email, Phone (+91), and Password
+//   - Sign In: collects Email and Password
+//   - Form validation: 8+ character password, match confirmation, terms checkbox
+//   - Calls `login()` or `register()` from AuthContext, saves JWT to localStorage
+//   - Redirects to homepage `/` on success
+//   - Left column showcases Bharat trust features (DigiLocker KYC, UPI payouts, ₹10L insurance)
+// ============================================================
+
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -7,68 +21,73 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login, register } = useAuth();
+
+  // Mode from URL query parameters (e.g. /login?mode=signup)
   const urlMode = searchParams.get('mode') === 'signup' ? 'signup' : 'signin';
   const [mode, setMode] = useState(urlMode);
   const [prevUrlMode, setPrevUrlMode] = useState(urlMode);
 
-  // Form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  // Form input states
+  const [fullName, setFullName] = useState('');
+  const [emailAddress, setEmailAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [formError, setFormError] = useState('');
 
+  // Keep internal mode synchronized if the URL parameter changes
   if (urlMode !== prevUrlMode) {
     setPrevUrlMode(urlMode);
     setMode(urlMode);
-    setError('');
+    setFormError('');
   }
 
-
-const handleSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setFormError('');
 
+    // Sign Up extra validations
     if (mode === 'signup') {
-        if (!name.trim()) return setError('Full name is required');
-        if (!phone.trim()) return setError('Phone number is required');
-        if (password !== confirmPassword) return setError('Passwords do not match');
-        if (!agreedToTerms) return setError('Please agree to the terms & conditions');
+      if (!fullName.trim()) return setFormError('Full name is required');
+      if (!phoneNumber.trim()) return setFormError('Phone number is required');
+      if (password !== confirmPassword) return setFormError('Passwords do not match');
+      if (!agreedToTerms) return setFormError('Please agree to the terms & conditions');
     }
 
-    if (!email.trim()) return setError('Email is required');
+    // Common validations
+    if (!emailAddress.trim()) return setFormError('Email is required');
     if (!password.trim() || password.length < 8) {
-        return setError('Password must be at least 8 characters');
+      return setFormError('Password must be at least 8 characters');
     }
 
     setIsLoading(true);
 
     try {
-        if (mode === 'signup') {
-            await register(name.trim(), email.trim(), password);
-        } else {
-            await login(email.trim(), password);
-        }
+      if (mode === 'signup') {
+        await register(fullName.trim(), emailAddress.trim(), password);
+      } else {
+        await login(emailAddress.trim(), password);
+      }
 
-        navigate('/');
+      // Route to home upon successful authentication
+      navigate('/');
     } catch (err) {
-        setError(err.message || 'Authentication failed. Please try again.');
+      setFormError(err.message || 'Authentication failed. Please try again.');
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
-
+  };
 
   const isSignUp = mode === 'signup';
 
   return (
     <div className="min-h-screen bg-[#070404] font-['Outfit'] flex flex-col relative overflow-hidden">
 
-      {/* ── Ambient Crimson Background Glows ── */}
+      {/* --- Ambient Crimson Background Glows --- */}
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute top-[15%] left-[10%] w-[500px] h-[500px] rounded-full"
@@ -86,7 +105,7 @@ const handleSubmit = async (e) => {
         />
       </div>
 
-      {/* ── Top Nav Bar ── */}
+      {/* --- Top Navigation Header --- */}
       <header className="relative z-20 w-full px-6 sm:px-10 py-6 flex items-center justify-between">
         <Link to="/" className="flex items-center group">
           <img
@@ -97,17 +116,17 @@ const handleSubmit = async (e) => {
         </Link>
         <Link
           to="/"
-          className="text-xs font-semibold text-white/70 hover:text-white px-3.5 py-1.5 rounded-full border border-white/15 hover:border-white/30 transition-all"
+          className="text-xs font-semibold text-white/70 hover:text-white px-3.5 py-1.5 rounded-full border border-white/15 hover:border-white/30 transition-all cursor-pointer"
         >
           ← Back to Home
         </Link>
       </header>
 
-      {/* ── Main Content: Two-Column Layout ── */}
+      {/* --- Main Content: 2-Column Desktop Grid --- */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 pb-12 pt-4">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-          {/* ── Left Column: Brand & Value Props ── */}
+          {/* Left Column: Brand Value Propositions & Trust Features */}
           <div className="hidden lg:flex flex-col justify-center space-y-8 pr-8">
             <div>
               <h1 className="text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
@@ -125,7 +144,7 @@ const handleSubmit = async (e) => {
               </p>
             </div>
 
-            {/* Trust Badges */}
+            {/* Indian Mobility Trust Badges */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-red-950/60 border border-red-500/25 flex items-center justify-center shrink-0">
@@ -164,7 +183,7 @@ const handleSubmit = async (e) => {
               </div>
             </div>
 
-            {/* Stats Row */}
+            {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-4 pt-2">
               <div className="bg-zinc-950/80 border border-red-950/40 rounded-2xl p-3 text-center">
                 <span className="block text-lg font-black text-[#ff3535]">15+</span>
@@ -181,18 +200,18 @@ const handleSubmit = async (e) => {
             </div>
           </div>
 
-          {/* ── Right Column: Auth Form Card ── */}
+          {/* Right Column: Authentication Form Card */}
           <div className="w-full max-w-md mx-auto lg:mx-0">
             <div className="relative bg-zinc-950/80 backdrop-blur-2xl border border-red-950/50 rounded-3xl p-7 sm:p-9 shadow-[0_30px_80px_rgba(0,0,0,0.6)] overflow-hidden">
 
-              {/* Decorative top gradient bar */}
+              {/* Decorative top crimson gradient bar */}
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#ff4b3a] via-[#ff3535] to-transparent" />
 
-              {/* Mode Toggle Tabs */}
+              {/* Mode Switcher Tabs */}
               <div className="flex items-center bg-zinc-900 rounded-xl p-1 mb-7 border border-zinc-800">
                 <button
                   type="button"
-                  onClick={() => { setMode('signin'); setError(''); }}
+                  onClick={() => { setMode('signin'); setFormError(''); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     !isSignUp
                       ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
@@ -203,7 +222,7 @@ const handleSubmit = async (e) => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setMode('signup'); setError(''); }}
+                  onClick={() => { setMode('signup'); setFormError(''); }}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     isSignUp
                       ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
@@ -214,7 +233,7 @@ const handleSubmit = async (e) => {
                 </button>
               </div>
 
-              {/* Heading */}
+              {/* Card Title */}
               <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-1">
                 {isSignUp ? 'Create your account' : 'Sign in to Rydely'}
               </h2>
@@ -225,19 +244,20 @@ const handleSubmit = async (e) => {
                 }
               </p>
 
-              {/* Error Banner */}
-              {error && (
+              {/* Error Message Box */}
+              {formError && (
                 <div className="mb-4 px-3.5 py-2.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-medium flex items-center gap-2">
                   <svg className="w-4 h-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
-                  {error}
+                  {formError}
                 </div>
               )}
 
+              {/* Authentication Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
 
-                {/* Name (Sign Up only) */}
+                {/* Full Name (Sign Up only) */}
                 {isSignUp && (
                   <div>
                     <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -245,29 +265,29 @@ const handleSubmit = async (e) => {
                     </label>
                     <input
                       type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
                       placeholder="e.g. Aarav Sharma"
                       className="w-full px-4 py-2.5 text-sm font-medium bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all"
                     />
                   </div>
                 )}
 
-                {/* Email */}
+                {/* Email Address */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                     Email Address
                   </label>
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
                     placeholder="you@example.com"
                     className="w-full px-4 py-2.5 text-sm font-medium bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all"
                   />
                 </div>
 
-                {/* Phone (Sign Up only) */}
+                {/* Phone Number (Sign Up only) */}
                 {isSignUp && (
                   <div>
                     <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -279,8 +299,8 @@ const handleSubmit = async (e) => {
                       </span>
                       <input
                         type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="98765 43210"
                         className="w-full px-4 py-2.5 text-sm font-medium bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 rounded-xl text-white placeholder:text-slate-600 focus:outline-none transition-all"
                       />
@@ -288,7 +308,7 @@ const handleSubmit = async (e) => {
                   </div>
                 )}
 
-                {/* Password */}
+                {/* Password Field */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                     Password
@@ -304,7 +324,7 @@ const handleSubmit = async (e) => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors cursor-pointer"
                       aria-label="Toggle password visibility"
                     >
                       {showPassword ? (
@@ -332,7 +352,7 @@ const handleSubmit = async (e) => {
                   </div>
                 )}
 
-                {/* Remember / Forgot (Sign In) OR Terms (Sign Up) */}
+                {/* Terms Agreement (Sign Up) or Remember Me (Sign In) */}
                 {isSignUp ? (
                   <label className="flex items-start gap-2.5 cursor-pointer">
                     <input
@@ -363,7 +383,7 @@ const handleSubmit = async (e) => {
                   </div>
                 )}
 
-                {/* Submit Button */}
+                {/* Submit Action Button */}
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -400,7 +420,7 @@ const handleSubmit = async (e) => {
                 </div>
               </div>
 
-              {/* Social OAuth Buttons */}
+              {/* Social OAuth Sign In Options */}
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -425,12 +445,12 @@ const handleSubmit = async (e) => {
                 </button>
               </div>
 
-              {/* Footer toggle */}
+              {/* Mode switch helper link */}
               <p className="mt-6 text-center text-xs text-slate-500">
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
                   type="button"
-                  onClick={() => { setMode(isSignUp ? 'signin' : 'signup'); setError(''); }}
+                  onClick={() => { setMode(isSignUp ? 'signin' : 'signup'); setFormError(''); }}
                   className="text-red-400 hover:text-red-300 font-bold cursor-pointer transition-colors"
                 >
                   {isSignUp ? 'Sign In' : 'Sign Up'}
@@ -443,7 +463,7 @@ const handleSubmit = async (e) => {
         </div>
       </div>
 
-      {/* ── Bottom HUD Footer ── */}
+      {/* --- Bottom Legal & Support Footer --- */}
       <footer className="relative z-10 w-full px-6 sm:px-10 py-5 flex items-center justify-between text-[10px] font-mono text-slate-600 tracking-widest border-t border-red-950/30">
         <span>© 2026 RYDELY INDIA PVT. LTD.</span>
         <div className="flex items-center gap-4">

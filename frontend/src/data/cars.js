@@ -1,12 +1,28 @@
+/**
+ * cars.js — Static sample car data used as placeholder/fallback content.
+ *
+ * This array is used on the homepage and car listing pages to show example cars
+ * before the backend API returns real data, or as demo content.
+ *
+ * Each car object matches the shape expected by CarCard and CarDetails components:
+ *   - id, name, category, image, price, location
+ *   - rating, tripsCount, hostName, isSuperhost (host info)
+ *   - badge, instantBooking, doorstepDelivery (feature flags)
+ *   - specs[] — array of { label, val } pairs
+ *   - features[] — array of feature strings
+ *
+ * NOTE: Once the backend API is fully connected, this file may no longer be needed
+ * for the Cars page, but is still used in some homepage sections.
+ */
+
+// --- Car Image Imports ---
 import xuvImg from '../assets/cars/bmw-offer.png';
 import safariImg from '../assets/cars/toyota-offer-2.png';
 import innovaImg from '../assets/cars/toyota-offer.png';
 import tharImg from '../assets/cars/nissan-offer.png';
 import mercedesImg from '../assets/cars/mercedes-offer.png';
 
-// Temporary catalogue data.
-// We will replace this with the backend API once Members 3 and 4
-// provide the vehicle endpoints.
+// --- Sample Car Catalogue ---
 export const sampleCars = [
   {
     id: 'car-1',

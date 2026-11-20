@@ -1,3 +1,16 @@
+// ============================================================
+// OwnerBanner.jsx — Car Owner (Host) Call-To-Action Banner
+// ------------------------------------------------------------
+// This promotional section encourages private vehicle owners to
+// list their idle cars on Rydely and earn passive income.
+//
+// Key Elements:
+//   - Gradient Crimson Banner Card with subtle radial backdrop glow
+//   - Earning potential headline (₹50,000+/month)
+//   - 3 host trust chips: Average Earnings, ₹20L Insurance, Instant UPI
+//   - One-click CTA routing to /offer-ride onboarding
+// ============================================================
+
 import { Link } from 'react-router-dom';
 import bannerCar from '../assets/cars/bmw-offer.png';
 
@@ -5,10 +18,10 @@ const OwnerBanner = () => {
   return (
     <section id="owner-section" className="py-16 lg:py-20 bg-[#070404] font-['Outfit'] border-t border-red-950/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Curved Crimson Banner Card */}
+
+        {/* --- Curved Crimson Banner Card --- */}
         <div className="relative rounded-3xl bg-gradient-to-r from-red-950 via-red-800 to-rose-950 text-white px-8 py-12 sm:px-12 sm:py-14 lg:px-16 lg:py-16 overflow-hidden shadow-2xl shadow-red-950/60 border border-red-500/30">
-          
+
           {/* Subtle Ambient Radial Lighting */}
           <div
             className="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"
@@ -20,8 +33,8 @@ const OwnerBanner = () => {
           />
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left Content Column */}
+
+            {/* Left Content Column: Headline, Description & Value Props */}
             <div className="lg:col-span-7 max-w-xl">
               <span className="inline-block text-xs font-bold tracking-widest uppercase text-red-200 mb-2 px-3.5 py-1 rounded-full bg-red-900/50 border border-red-400/30">
                 🇮🇳 Car Owner Host Program
@@ -29,7 +42,7 @@ const OwnerBanner = () => {
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight">
                 Turn Your Parked Car into ₹50,000+ Every Month
               </h2>
-              
+
               <p className="text-sm sm:text-base text-red-100/90 leading-relaxed mb-6 font-normal">
                 Have a car sitting idle in your garage or driveway? List it on Rydely and rent it out to verified guests. Set your own daily price, maintain 100% control of your calendar, and rest easy with ₹20 Lakh insurance coverage.
               </p>
@@ -50,6 +63,7 @@ const OwnerBanner = () => {
                 </div>
               </div>
 
+              {/* Onboarding Call to Action */}
               <div>
                 <Link
                   to="/offer-ride"
@@ -60,7 +74,7 @@ const OwnerBanner = () => {
               </div>
             </div>
 
-            {/* Right Car Visual Column */}
+            {/* Right Vehicle Visual Display */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end relative mt-4 lg:mt-0">
               <div className="relative w-full max-w-md">
                 <img

@@ -1,3 +1,14 @@
+/**
+ * Footer.jsx
+ *
+ * The site-wide footer rendered at the bottom of every page.
+ * Layout (5-column grid on desktop, stacked on mobile):
+ *   Column 1-2: Brand logo, description, trust badges, social media links
+ *   Column 3:   Popular rental cities (links to /cars?city=...)
+ *   Column 4:   Hosts & Renters links (list car, browse, how it works, etc.)
+ *   Column 5:   Contact info (address, phone, email, roadside assistance)
+ * Bottom bar: Copyright, DPIIT recognition, GSTIN, and legal policy links
+ */
 import { Link } from 'react-router-dom';
 import carLogo from '../assets/carlogo.png';
 
@@ -6,11 +17,12 @@ const Footer = () => {
     <footer className="bg-[#070404] text-slate-400 font-['Outfit'] border-t border-red-950/40 relative z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
         
-        {/* Main 5 Columns Grid */}
+        {/* --- Main 5-Column Grid --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 pb-12 border-b border-zinc-900">
           
-          {/* Column 1: Brand & Description (2 cols wide on desktop) */}
+          {/* --- Column 1-2: Brand & Description (spans 2 columns on desktop) --- */}
           <div className="lg:col-span-2 space-y-4">
+            {/* Rydely logo — links back to homepage */}
             <Link to="/" className="inline-flex items-center group">
               <img
                 src={carLogo}
@@ -19,10 +31,12 @@ const Footer = () => {
               />
             </Link>
 
+            {/* Brief brand description */}
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed font-normal">
               India's premier peer-to-peer self-drive car rental & vehicle sharing marketplace. Connect private car owners with verified drivers for local commutes and outstation road trips with complete insurance coverage.
             </p>
 
+            {/* Trust badges — verification and insurance highlights */}
             <div className="pt-1 flex items-center flex-wrap gap-2 text-[11px] text-slate-300">
               <span className="px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-semibold inline-flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -33,7 +47,7 @@ const Footer = () => {
               </span>
             </div>
 
-            {/* Social Links */}
+            {/* --- Social Media Links --- */}
             <div className="flex items-center gap-3 pt-3 text-slate-400">
               <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900/60 flex items-center justify-center hover:text-red-400 hover:border-red-500 transition-colors">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -50,7 +64,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 2: Popular Rental Cities */}
+          {/* --- Column 3: Popular Rental Cities --- */}
           <div>
             <h4 className="text-[11px] font-bold text-white tracking-widest uppercase mb-4 font-mono">
               Top Rental Cities
@@ -65,7 +79,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 3: Platform & Host Program */}
+          {/* --- Column 4: Hosts & Renters Links --- */}
           <div>
             <h4 className="text-[11px] font-bold text-white tracking-widest uppercase mb-4 font-mono">
               Hosts & Renters
@@ -80,7 +94,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 4: Contact & Registered Indian Office */}
+          {/* --- Column 5: Contact & Support --- */}
           <div>
             <h4 className="text-[11px] font-bold text-white tracking-widest uppercase mb-4 font-mono">
               Contact & Support
@@ -105,7 +119,7 @@ const Footer = () => {
 
         </div>
 
-        {/* Bottom Bar: Copyright, DPIIT, GST & Legal Terms */}
+        {/* --- Bottom Bar: Copyright, Regulatory Info & Legal Links --- */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© 2026 Rydely Technologies India Pvt. Ltd. All rights reserved.</p>
           <div className="flex items-center flex-wrap gap-4 text-[11px] text-slate-400">

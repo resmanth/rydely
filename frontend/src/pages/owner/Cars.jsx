@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -26,24 +26,38 @@ const OwnerCars = () => {
     }
   }, [authLoading, isAuthenticated, isOwner, navigate]);
 
-  const fetchCars = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await ownerApi.cars();
-      setCars(res.cars || []);
-    } catch (err) {
-      setError(err.message || 'Could not load your cars');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    if (isAuthenticated && isOwner) {
-      fetchCars();
+    let isCancelled = false;
+
+    if (!isAuthenticated || !isOwner) {
+      return;
     }
-  }, [isAuthenticated, isOwner, fetchCars]);
+
+    const loadOwnerCars = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await ownerApi.cars();
+        if (!isCancelled) {
+          setCars(res.cars || []);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(err.message || 'Could not load your cars');
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadOwnerCars();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, isOwner]);
 
   const handleToggleAvailability = async (carId) => {
     setActionLoadingId(carId);

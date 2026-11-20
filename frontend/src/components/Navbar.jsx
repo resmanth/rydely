@@ -1,36 +1,64 @@
+/**
+ * Navbar.jsx
+ *
+ * The main navigation bar displayed at the top of every page.
+ * Features:
+ *   - Fixed position that changes appearance on scroll (transparent → solid dark background)
+ *   - Desktop layout: left nav links, center logo dock, right nav links + auth actions
+ *   - Mobile layout: hamburger toggle that opens a full drawer menu
+ *   - Shows different buttons depending on whether the user is logged in (Logout) or not (Log In / Sign In)
+ *   - If the user is a car owner, shows a "Host HQ" link to the owner dashboard
+ */
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import carLogo from '../assets/carlogo.png';
 
 const Navbar = () => {
+  // --- Auth & Routing ---
+  // Pull authentication state and user info from our global auth context
   const { isAuthenticated, logout, user, isOwner } = useAuth();
+
+  // --- Component State ---
+  // Controls whether the mobile hamburger drawer is open
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Tracks whether the user has scrolled past 20px (triggers the solid navbar style)
   const [scrolled, setScrolled] = useState(false);
+
+  // Get the current URL path (to highlight the active nav link)
   const location = useLocation();
+  // Programmatic navigation (used after logout to redirect to home)
   const navigate = useNavigate();
 
+  // --- Scroll Listener Effect ---
+  // Attaches a scroll event listener on mount that sets `scrolled` to true when
+  // the page is scrolled more than 20px down. Cleans up the listener on unmount.
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    handleScroll(); // Check initial scroll position on mount
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // --- Navigation Link Definitions ---
+  // Links displayed to the LEFT of the logo on desktop
   const leftNavLinks = [
     { name: 'Rent a Car', path: '/cars' },
     { name: 'List Your Car', path: '/offer-ride' },
     { name: 'How It Works', path: '/how-it-works' },
   ];
 
+  // Links displayed to the RIGHT of the logo on desktop
   const rightNavLinks = [
     { name: 'About', path: '/about' },
   ];
 
+  // Helper: returns true if the given path matches the current URL (used for active styling)
   const isActive = (path) => location.pathname === path;
 
+  // Logs the user out and redirects to the homepage
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -47,7 +75,8 @@ const Navbar = () => {
       <div className="w-full px-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between h-16 sm:h-20">
 
-          {/* ── Left Navigation Links (Desktop) ── */}
+          {/* --- Desktop Left Navigation Links --- */}
+          {/* These links (Rent a Car, List Your Car, How It Works) are hidden on mobile */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-8 flex-1">
             {leftNavLinks.map((link) => (
               <Link
@@ -64,7 +93,8 @@ const Navbar = () => {
             ))}
           </nav>
 
-          {/* Mobile Left Menu Button */}
+          {/* --- Mobile Hamburger Button (visible on small screens only) --- */}
+          {/* Toggles the mobile drawer menu open/closed */}
           <div className="flex lg:hidden flex-1 justify-start">
             <button
               type="button"
@@ -72,6 +102,7 @@ const Navbar = () => {
               className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
+              {/* Show X icon when menu is open, hamburger icon when closed */}
               {mobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -84,15 +115,18 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* ── Center: Navbar Logo Dock Target ── */}
-          {/* ScrollLogo animates smoothly into this anchor slot on scroll */}
+          {/* --- Center: Logo Dock Target --- */}
+          {/* This empty div is an anchor point. The ScrollLogo component animates into
+              this slot when the user scrolls down. It acts as a "dock" for the floating logo. */}
           <div
             id="navbar-logo-dock"
             className="relative flex items-center justify-center w-24 sm:w-32 h-14 shrink-0 pointer-events-auto"
           />
 
-          {/* ── Right Navigation & Auth Actions (Desktop) ── */}
+          {/* --- Desktop Right Navigation & Auth Actions --- */}
+          {/* Contains: About link, currency badge, owner dashboard link, profile link, login/logout */}
           <div className="hidden lg:flex items-center justify-end gap-4 flex-1">
+            {/* Right-side nav links (currently just "About") */}
             {rightNavLinks.map((link) => (
               <Link
                 key={link.name}
@@ -107,13 +141,13 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Currency Badge */}
+            {/* Currency Badge — static indicator showing INR (₹) */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/50 border border-red-500/30 text-[11px] font-bold text-red-200 tracking-wider">
               <span>🇮🇳</span>
               <span>INR (₹)</span>
             </div>
 
-            {/* Owner HQ Button */}
+            {/* Owner Dashboard Link — only shown if user is a car owner/host */}
             {isOwner && (
               <Link
                 to="/owner/dashboard"
@@ -123,20 +157,23 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* Profile Button */}
+            {/* Profile Button — links to the user profile page */}
             <Link
               to="/profile"
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-red-500/40 text-xs font-semibold text-white transition-all group cursor-pointer"
               aria-label="User Profile"
             >
+              {/* Small circular avatar icon */}
               <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm shadow-red-600/40">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
+              {/* Show user's first name if logged in, otherwise "Profile" */}
               <span className="group-hover:text-red-400 transition-colors">{isAuthenticated && user?.name ? user.name.split(' ')[0] : 'Profile'}</span>
             </Link>
 
+            {/* Auth Buttons — Logout if logged in, otherwise Log In / Sign In */}
             {isAuthenticated ? (
               <button
                 type="button"
@@ -163,7 +200,8 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Right Action */}
+          {/* --- Mobile Right Action Buttons (visible on small screens only) --- */}
+          {/* Compact profile icon + login/logout button for mobile */}
           <div className="flex lg:hidden flex-1 justify-end items-center gap-2">
             <Link
               to="/profile"
@@ -197,14 +235,19 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* ── Mobile Drawer Menu ── */}
+      {/* --- Mobile Drawer Menu --- */}
+      {/* Full-width dropdown that appears below the navbar when the hamburger is toggled.
+          Contains: logo, profile link, owner dashboard (if owner), all nav links, auth buttons. */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-white/15 bg-black/95 backdrop-blur-2xl px-5 pt-4 pb-6 space-y-4 shadow-2xl">
+          {/* Rydely logo at the top of the drawer */}
           <div className="flex justify-center pb-2 border-b border-white/10">
             <img src={carLogo} alt="Rydely" className="h-9 w-auto object-contain brightness-110 drop-shadow-[0_0_12px_rgba(255,53,53,0.35)]" />
           </div>
 
+          {/* Navigation links list */}
           <nav className="flex flex-col space-y-1">
+            {/* Profile link */}
             <Link
               to="/profile"
               onClick={() => setMobileMenuOpen(false)}
@@ -218,6 +261,7 @@ const Navbar = () => {
               <span>My Profile</span>
             </Link>
 
+            {/* Owner dashboard link — only rendered for car hosts */}
             {isOwner && (
               <Link
                 to="/owner/dashboard"
@@ -228,6 +272,7 @@ const Navbar = () => {
               </Link>
             )}
 
+            {/* All navigation links (left + right combined) */}
             {[...leftNavLinks, ...rightNavLinks].map((link) => (
               <Link
                 key={link.name}
@@ -244,6 +289,7 @@ const Navbar = () => {
             ))}
           </nav>
 
+          {/* --- Mobile Drawer Auth Buttons --- */}
           <div className="pt-3 border-t border-white/10 flex items-center gap-3">
             {isAuthenticated ? (
               <button

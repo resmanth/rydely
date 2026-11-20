@@ -1,3 +1,19 @@
+// ============================================================
+// ListYourCar.jsx — Host Onboarding & Vehicle Listing Form
+// ------------------------------------------------------------
+// This page manages the private car host onboarding journey:
+//   - If user is not logged in: redirects to /login?mode=signup
+//   - If user is logged in as "user": calls POST /api/owner/change-role
+//     to upgrade them to "owner" role and unlocks the form.
+//   - If user is already an "owner": scrolls directly down to the listing form.
+//   - Multi-field Car Registration Form:
+//       - Brand, Model, Year, Category (SUV/MPV/4x4/Luxury)
+//       - Seating Capacity, Fuel Type, Transmission
+//       - Daily Rate (₹), Pickup City Location, Description
+//       - Image upload: streams to ImageKit via Multer multipart/form-data
+//   - Benefits, Requirements (RC, Insurance), and 4-step listing walkthrough
+// ============================================================
+
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -6,7 +22,8 @@ import { ownerApi } from '../services/api';
 import CITIES from '../data/cities';
 import bmwOffer from '../assets/cars/bmw-offer.png';
 
-const benefits = [
+// 4 host financial and flexibility benefits
+const hostBenefits = [
   {
     icon: '💰',
     title: 'Earn from your car',
@@ -29,14 +46,16 @@ const benefits = [
   },
 ];
 
-const steps = [
+// 4-step listing roadmap
+const listingSteps = [
   ['01', 'Tell us about your car', 'Add the make, model, year and other essential vehicle details.'],
   ['02', 'Upload your documents', 'Keep your registration and required vehicle documents ready for review.'],
   ['03', 'Add photos and pricing', 'Show renters your car and choose your rental price and availability.'],
   ['04', 'Publish your listing', 'Review your information and submit your vehicle listing.'],
 ];
 
-const requirements = [
+// Essential documentation requirements
+const listingRequirements = [
   'A valid vehicle registration certificate (RC)',
   'A valid insurance document',
   'Clear exterior and interior vehicle photos',
@@ -49,10 +68,11 @@ const ListYourCar = () => {
   const navigate = useNavigate();
   const formRef = useRef(null);
 
+  // Upgrade role state & form toggle
   const [roleLoading, setRoleLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  // Form state
+  // Form input states
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
   const [year, setYear] = useState('');
@@ -67,6 +87,7 @@ const ListYourCar = () => {
   const [imagePreview, setImagePreview] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Local image file handler with object URL preview
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -75,6 +96,7 @@ const ListYourCar = () => {
     }
   };
 
+  // Main Call-to-action button handler
   const handleCTAClick = async () => {
     if (!isAuthenticated) {
       navigate('/login?mode=signup');
@@ -83,6 +105,7 @@ const ListYourCar = () => {
     if (!isOwner) {
       try {
         setRoleLoading(true);
+        // Call backend to promote user to host
         await ownerApi.changeRole();
         await refreshUser();
         toast.success('You are now a Rydely Host! 🎉');
@@ -97,14 +120,16 @@ const ListYourCar = () => {
       }
       return;
     }
+    // Already an owner: reveal and scroll to form
     setShowForm(true);
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Submit vehicle form to backend
   const handleSubmitCar = async (e) => {
     e.preventDefault();
 
-    // Validation
+    // Input validation checks
     if (!brand.trim()) return toast.error('Vehicle brand is required');
     if (!model.trim()) return toast.error('Vehicle model is required');
     const currentYear = new Date().getFullYear();
@@ -122,9 +147,10 @@ const ListYourCar = () => {
 
     setSubmitting(true);
     try {
-      const fd = new FormData();
-      fd.append('image', imageFile);
-      fd.append(
+      // Build FormData payload (file + JSON metadata)
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append(
         'carData',
         JSON.stringify({
           brand: brand.trim(),
@@ -140,10 +166,10 @@ const ListYourCar = () => {
         })
       );
 
-      await ownerApi.addCar(fd);
+      await ownerApi.addCar(formData);
       toast.success('Machine listed successfully! 🚀');
 
-      // Reset form
+      // Reset form fields
       setBrand('');
       setModel('');
       setYear('');
@@ -172,7 +198,8 @@ const ListYourCar = () => {
 
   return (
     <div className="min-h-screen bg-[#080607] text-white pt-28 pb-20 font-['Outfit']">
-      {/* HERO */}
+
+      {/* --- Section 1: Hero Header & Overview --- */}
       <section className="relative overflow-hidden px-5 pt-12 pb-20">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -202,6 +229,7 @@ const ListYourCar = () => {
               looking for their next drive.
             </p>
 
+            {/* Action buttons */}
             <div className="mt-9 flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
@@ -224,6 +252,7 @@ const ListYourCar = () => {
             </p>
           </div>
 
+          {/* Right Hero Vehicle Visual Card */}
           <div className="relative">
             <div className="absolute inset-8 rounded-full bg-red-600/20 blur-[90px]" />
             <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-800/80 to-zinc-950 p-5 sm:p-8">
@@ -246,7 +275,7 @@ const ListYourCar = () => {
         </div>
       </section>
 
-      {/* ADD YOUR CAR SECTION (Owner / Revealed) */}
+      {/* --- Section 2: Add Your Car Form (Revealed for Hosts) --- */}
       {(isOwner || showForm) && (
         <section ref={formRef} className="max-w-4xl mx-auto px-5 mb-20 scroll-mt-32">
           <div className="p-6 sm:p-10 rounded-3xl bg-zinc-950/90 border border-red-500/30 shadow-2xl shadow-red-950/20">
@@ -264,7 +293,7 @@ const ListYourCar = () => {
 
             <form onSubmit={handleSubmitCar} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Brand */}
+                {/* Brand / Make */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                     Brand / Make
@@ -292,7 +321,7 @@ const ListYourCar = () => {
                   />
                 </div>
 
-                {/* Year */}
+                {/* Manufacturing Year */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                     Manufacturing Year
@@ -308,7 +337,7 @@ const ListYourCar = () => {
                   />
                 </div>
 
-                {/* Category */}
+                {/* Category Dropdown */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                     Vehicle Category
@@ -358,7 +387,7 @@ const ListYourCar = () => {
                   </select>
                 </div>
 
-                {/* Transmission */}
+                {/* Transmission Type */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                     Transmission
@@ -373,7 +402,7 @@ const ListYourCar = () => {
                   </select>
                 </div>
 
-                {/* Daily Price */}
+                {/* Daily Price in INR */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                     Price Per Day (₹)
@@ -389,7 +418,7 @@ const ListYourCar = () => {
                 </div>
               </div>
 
-              {/* Location */}
+              {/* Pickup City Location */}
               <div>
                 <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                   Pickup City Location
@@ -399,9 +428,9 @@ const ListYourCar = () => {
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-red-500 transition-colors"
                 >
-                  {CITIES.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
+                  {CITIES.map((cityOption) => (
+                    <option key={cityOption.value} value={cityOption.value}>
+                      {cityOption.label}
                     </option>
                   ))}
                 </select>
@@ -421,7 +450,7 @@ const ListYourCar = () => {
                 />
               </div>
 
-              {/* Photo Upload & Preview */}
+              {/* Vehicle Image Upload */}
               <div>
                 <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                   Vehicle Image
@@ -439,7 +468,7 @@ const ListYourCar = () => {
                 )}
               </div>
 
-              {/* Submit CTA */}
+              {/* Submit Button */}
               <div className="pt-2">
                 <button
                   type="submit"
@@ -466,7 +495,7 @@ const ListYourCar = () => {
         </section>
       )}
 
-      {/* BENEFITS */}
+      {/* --- Section 3: Host Benefits --- */}
       <section className="max-w-7xl mx-auto px-5 mt-8">
         <div className="max-w-2xl mb-9">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-red-400">Why host with Rydely?</p>
@@ -475,17 +504,17 @@ const ListYourCar = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {benefits.map((benefit) => (
-            <article key={benefit.title} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-red-500/40 hover:bg-white/[0.05]">
-              <span className="text-3xl">{benefit.icon}</span>
-              <h3 className="mt-6 text-lg font-bold">{benefit.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">{benefit.text}</p>
+          {hostBenefits.map((benefitItem) => (
+            <article key={benefitItem.title} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-red-500/40 hover:bg-white/[0.05]">
+              <span className="text-3xl">{benefitItem.icon}</span>
+              <h3 className="mt-6 text-lg font-bold">{benefitItem.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">{benefitItem.text}</p>
             </article>
           ))}
         </div>
       </section>
 
-      {/* PROCESS */}
+      {/* --- Section 4: 4-Step Process Guide --- */}
       <section className="max-w-7xl mx-auto px-5 mt-24">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-red-400">Getting started</p>
@@ -494,18 +523,18 @@ const ListYourCar = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {steps.map(([number, title, text]) => (
-            <div key={number} className="rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900 to-[#100b0c] p-6">
-              <span className="font-mono text-sm text-red-400">{number}</span>
+          {listingSteps.map(([stepNumber, stepTitle, stepDescription]) => (
+            <div key={stepNumber} className="rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900 to-[#100b0c] p-6">
+              <span className="font-mono text-sm text-red-400">{stepNumber}</span>
               <div className="my-6 h-px bg-gradient-to-r from-red-500/60 to-transparent" />
-              <h3 className="text-lg font-bold">{title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-zinc-500">{text}</p>
+              <h3 className="text-lg font-bold">{stepTitle}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-zinc-500">{stepDescription}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* REQUIREMENTS */}
+      {/* --- Section 5: Legal & Document Requirements --- */}
       <section className="max-w-7xl mx-auto px-5 mt-24">
         <div className="grid lg:grid-cols-2 gap-8 rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900/90 to-[#10090b] p-7 sm:p-10 lg:p-12">
           <div>
@@ -524,7 +553,7 @@ const ListYourCar = () => {
           </div>
 
           <div className="space-y-3">
-            {requirements.map((item) => (
+            {listingRequirements.map((item) => (
               <div key={item} className="flex items-start gap-3 rounded-xl border border-white/5 bg-black/20 p-4">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-sm text-red-400">✓</span>
                 <span className="text-sm text-zinc-300">{item}</span>
@@ -534,7 +563,7 @@ const ListYourCar = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* --- Section 6: Bottom CTA Section --- */}
       <section className="max-w-5xl mx-auto px-5 mt-24">
         <div className="relative overflow-hidden rounded-[2rem] border border-red-500/30 bg-gradient-to-br from-red-950 via-[#260b10] to-zinc-950 p-8 sm:p-14 text-center">
           <div className="absolute w-72 h-72 bg-red-600/20 blur-[100px] rounded-full -top-32 left-1/2 -translate-x-1/2" />

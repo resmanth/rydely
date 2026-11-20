@@ -1,4 +1,18 @@
-const testimonials = [
+// ============================================================
+// Testimonials.jsx — Infinite Marquee Customer Reviews
+// ------------------------------------------------------------
+// This component renders verified reviews from car owners (hosts)
+// and renters across India (Bengaluru, Mumbai, Delhi, Pune, Goa).
+//
+// Key Features:
+//   - CSS keyframe animation for continuous smooth infinite horizontal scrolling
+//   - Duplicated array `[...reviews, ...reviews]` so scroll never flashes or jumps
+//   - Pauses on mouse hover (`:hover { animation-play-state: paused; }`)
+//   - Soft fade masks on left and right borders for polished aesthetic
+// ============================================================
+
+// List of real verified testimonials from Indian hosts and drivers
+const customerReviews = [
   {
     id: 1,
     name: 'Aarav Sharma',
@@ -81,8 +95,8 @@ const testimonials = [
 const Testimonials = () => {
   return (
     <section className="py-24 bg-[#070404] font-['Outfit'] border-t border-red-950/40 text-white relative overflow-hidden">
-      
-      {/* ── Keyframe styles for continuous infinite scroll ── */}
+
+      {/* --- Keyframe Styles for Continuous Marquee Scroll --- */}
       <style>{`
         @keyframes infiniteReviewScroll {
           0% {
@@ -113,7 +127,7 @@ const Testimonials = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mb-10">
-        {/* Section Header */}
+        {/* --- Section Header --- */}
         <div className="text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/60 border border-red-500/30 text-red-400 text-[11px] font-semibold tracking-widest uppercase mb-3 shadow-md shadow-red-950/50">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -134,7 +148,7 @@ const Testimonials = () => {
         </div>
       </div>
 
-      {/* ── Infinite Scrolling Carousel Container ── */}
+      {/* --- Infinite Scrolling Carousel Container --- */}
       <div className="relative w-full overflow-hidden py-4">
 
         {/* Left Edge Fade Mask */}
@@ -145,57 +159,57 @@ const Testimonials = () => {
 
         {/* Continuous Track (Duplicated 2x for a mathematically seamless infinite loop) */}
         <div className="infinite-review-track flex gap-6 px-4">
-          {[...testimonials, ...testimonials].map((t, idx) => (
+          {[...customerReviews, ...customerReviews].map((review, index) => (
             <div
-              key={`${t.id}-${idx}`}
+              key={`${review.id}-${index}`}
               className="w-[340px] sm:w-[380px] shrink-0 bg-zinc-950/85 hover:bg-zinc-900/95 backdrop-blur-xl border border-red-950/60 hover:border-red-500/50 p-6 rounded-3xl shadow-xl hover:shadow-red-600/10 transition-all duration-300 flex flex-col justify-between select-none cursor-pointer group"
             >
               <div>
-                {/* Author Info */}
+                {/* Author Avatar & Location */}
                 <div className="flex items-center gap-3.5 mb-4">
                   <img
-                    src={t.avatar}
-                    alt={t.name}
+                    src={review.avatar}
+                    alt={review.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-red-500/40 group-hover:border-red-500 transition-colors shrink-0"
                     loading="lazy"
                   />
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-bold text-white leading-snug truncate group-hover:text-red-400 transition-colors">
-                      {t.name}
+                      {review.name}
                     </h3>
                     <p className="text-[11px] text-slate-400 truncate">
-                      {t.role}
+                      {review.role}
                     </p>
                     <p className="text-[10px] text-red-400 font-semibold truncate">
-                      {t.location}
+                      {review.location}
                     </p>
                   </div>
                 </div>
 
-                {/* Car Tag + Stars */}
+                {/* Car Tag + Star Rating */}
                 <div className="flex items-center justify-between gap-2 mb-3.5 pb-3 border-b border-zinc-800/80">
                   <span className="text-[10px] font-semibold text-slate-300 bg-zinc-900 px-2.5 py-0.5 rounded-full border border-zinc-800 truncate">
-                    🚗 {t.route}
+                    🚗 {review.route}
                   </span>
                   <div className="flex items-center gap-0.5 text-amber-400 text-xs shrink-0">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <span key={i}>★</span>
+                    {[...Array(review.rating)].map((_, starIndex) => (
+                      <span key={starIndex}>★</span>
                     ))}
                   </div>
                 </div>
 
-                {/* Review Text */}
+                {/* Review Quote Text */}
                 <p className="text-xs sm:text-[13px] text-slate-300 leading-relaxed italic mb-4">
-                  "{t.quote}"
+                  "{review.quote}"
                 </p>
               </div>
 
-              {/* Verified Trust Tag */}
+              {/* Verified Trust Badge */}
               <div className="pt-3 border-t border-slate-800/60 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-400">
                 <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="truncate">{t.verifiedBadge}</span>
+                <span className="truncate">{review.verifiedBadge}</span>
               </div>
             </div>
           ))}

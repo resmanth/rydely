@@ -1,3 +1,20 @@
+// ============================================================
+// Cars.jsx — Vehicle Fleet Catalog & Search Discovery Page
+// ------------------------------------------------------------
+// This page allows users to discover and filter all self-drive cars:
+//   - Receives query params from the Hero search widget on Home:
+//       ?city=...&pickupDate=...&returnDate=...&category=...
+//   - Live City Matcher: uses `matchCity(cityText)` to target a specific
+//     city API call, or fans out in parallel across all cities if empty.
+//   - Client-side filters:
+//       - Category: SUV, MPV, 4x4, Luxury, or All
+//       - Price Range: Min Price & Max Price (₹/day)
+//       - Sorting: Recommended, Price Low to High, Price High to Low
+//   - Renders matching vehicles in a responsive 3-column `CarCard` grid
+//   - Saves chosen car into `sessionStorage` and passes `state: { car }`
+//     upon navigating to `/cars/:id` for zero-lag page transitions.
+// ============================================================
+
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import CarCard from '../components/CarCard';
@@ -5,17 +22,18 @@ import { carsApi } from '../services/api';
 import { mapCar } from '../services/carMapper';
 import { matchCity, allCityValues } from '../data/cities';
 
+// Helper to format default dates (tomorrow and day after)
 const getDateOffset = (days) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  const dateObj = new Date();
+  dateObj.setDate(dateObj.getDate() + days);
+  return dateObj.toISOString().slice(0, 10);
 };
 
 const Cars = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Read the search information passed from the homepage.
+  // Read URL query parameters passed from Homepage search widget
   const urlCity = searchParams.get('city') || '';
   const urlCategory = searchParams.get('category') || 'all';
   const pickupDate = searchParams.get('pickupDate') || '';
@@ -26,23 +44,23 @@ const Cars = () => {
   const urlMaxPrice = searchParams.get('maxPrice') || '';
   const urlSortBy = searchParams.get('sortBy') || 'recommended';
 
-  // Featured vehicle links use ?car=vehicle-name.
+  // Featured car links (e.g. from Hero or FeaturedVehicles: ?car=vehicle-name)
   const featuredCar = searchParams.get('car') || searchParams.get('carName') || '';
   const featuredCarId = searchParams.get('carId') || '';
 
-  // Local filter state.
+  // Local filter states
   const [city, setCity] = useState(urlCity);
   const [category, setCategory] = useState(urlCategory.toLowerCase());
   const [minPrice, setMinPrice] = useState(urlMinPrice);
   const [maxPrice, setMaxPrice] = useState(urlMaxPrice);
   const [sortBy, setSortBy] = useState(urlSortBy);
 
-  // API data state
+  // API response data state
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Keep the filter state in sync if the URL changes.
+  // Synchronize local filter state if URL changes
   const [prevUrlCity, setPrevUrlCity] = useState(urlCity);
   const [prevUrlCat, setPrevUrlCat] = useState(urlCategory);
   const [prevUrlMin, setPrevUrlMin] = useState(urlMinPrice);
@@ -69,7 +87,7 @@ const Cars = () => {
     setSortBy(urlSortBy);
   }
 
-  // Build ISO dates for the API
+  // Build standard ISO datetime strings for backend availability check
   const pickupISO = pickupDate
     ? `${pickupDate}T${pickupTime || '10:00'}`
     : `${getDateOffset(1)}T10:00`;
@@ -77,32 +95,31 @@ const Cars = () => {
     ? `${returnDate}T${returnTime || '18:00'}`
     : `${getDateOffset(2)}T18:00`;
 
-  // Debounce ref
+  // Debounce timer reference for typing in the city input
   const debounceRef = useRef(null);
 
-  // Fetch cars from API
+  // Fetch cars from backend availability API
   const fetchCars = useCallback(async (cityText) => {
     setLoading(true);
     setError('');
 
     try {
-      const matched = matchCity(cityText);
-
+      const matchedCity = matchCity(cityText);
       let allCars = [];
 
-      if (matched) {
-        // Exact city match → one API call
-        const data = await carsApi.checkAvailability({
-          location: matched,
+      if (matchedCity) {
+        // Specific city match → single targeted API call
+        const responseData = await carsApi.checkAvailability({
+          location: matchedCity,
           pickupDate: pickupISO,
           returnDate: returnISO,
         });
-        allCars = (data.availableCars || []).map(mapCar);
+        allCars = (responseData.availableCars || []).map(mapCar);
       } else if (!cityText || !cityText.trim()) {
-        // Empty city → fetch all cities in parallel
-        const cities = allCityValues();
-        const results = await Promise.allSettled(
-          cities.map((c) =>
+        // Empty city filter → fetch available cars across all major cities in parallel
+        const citiesList = allCityValues();
+        const settledResults = await Promise.allSettled(
+          citiesList.map((c) =>
             carsApi.checkAvailability({
               location: c,
               pickupDate: pickupISO,
@@ -110,13 +127,12 @@ const Cars = () => {
             })
           )
         );
-        for (const r of results) {
-          if (r.status === 'fulfilled' && r.value.availableCars) {
-            allCars.push(...r.value.availableCars.map(mapCar));
+        for (const res of settledResults) {
+          if (res.status === 'fulfilled' && res.value?.availableCars) {
+            allCars.push(...res.value.availableCars.map(mapCar));
           }
         }
       }
-      // else: non-empty text with no city match → allCars stays []
 
       setCars(allCars);
     } catch (err) {
@@ -127,7 +143,7 @@ const Cars = () => {
     }
   }, [pickupISO, returnISO]);
 
-  // Fetch on mount and when city/dates change (debounced for city typing)
+  // Fetch on mount and when city or dates change (debounced for input typing)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -138,18 +154,18 @@ const Cars = () => {
     };
   }, [city, pickupISO, returnISO, fetchCars]);
 
-  // Client-side filters on the fetched + mapped data
+  // Apply client-side filters (category, price bounds, featured match, sorting)
   const filteredCars = useMemo(() => {
     let result = [...cars];
 
-    // Vehicle category filter.
+    // Vehicle category filter
     if (category !== 'all' && category !== 'instant') {
       result = result.filter(
         (car) => car.category?.toLowerCase() === category
       );
     }
 
-    // Price filters.
+    // Min and max price filters
     if (minPrice !== '') {
       result = result.filter((car) => car.price >= Number(minPrice));
     }
@@ -157,7 +173,7 @@ const Cars = () => {
       result = result.filter((car) => car.price <= Number(maxPrice));
     }
 
-    // Featured car selection.
+    // Featured car name/ID selection
     if (featuredCarId) {
       result = result.filter((car) => car.id === featuredCarId);
     } else if (featuredCar) {
@@ -166,7 +182,7 @@ const Cars = () => {
       );
     }
 
-    // Sorting.
+    // Price sorting
     if (sortBy === 'price-low') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-high') {
@@ -176,6 +192,7 @@ const Cars = () => {
     return result;
   }, [cars, category, minPrice, maxPrice, sortBy, featuredCar, featuredCarId]);
 
+  // Clear all filters back to default
   const clearFilters = () => {
     setCity('');
     setCategory('all');
@@ -199,11 +216,11 @@ const Cars = () => {
     featuredCar !== '' ||
     featuredCarId !== '';
 
-  // Navigate to details with car data in state + sessionStorage
+  // Navigate to car details page with caching in sessionStorage
   const handleCardNav = (car) => {
     try {
       sessionStorage.setItem(`rydely-car-${car.id}`, JSON.stringify(car));
-    } catch { /* ignore quota errors */ }
+    } catch { /* ignore quota */ }
     navigate(`/cars/${encodeURIComponent(car.id)}${window.location.search}`, {
       state: { car },
     });
@@ -213,7 +230,7 @@ const Cars = () => {
     <div className="min-h-screen bg-[#070404] text-white font-['Outfit'] pt-24 sm:pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Page heading */}
+        {/* --- Page Heading --- */}
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs font-mono font-bold tracking-widest uppercase text-red-400 bg-red-950/60 border border-red-500/30 px-3.5 py-1 rounded-full">
             VEHICLE FLEET · FIND & RENT
@@ -228,11 +245,11 @@ const Cars = () => {
           </p>
         </div>
 
-        {/* Search and filter panel */}
+        {/* --- Search and Filter Control Panel --- */}
         <section className="mb-10 p-5 sm:p-6 rounded-3xl bg-zinc-950/80 border border-zinc-800 shadow-xl">
           <div className="flex flex-col lg:flex-row lg:items-end gap-4">
 
-            {/* City search */}
+            {/* City Search Bar */}
             <div className="flex-1">
               <label htmlFor="city-search" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                 Pickup city
@@ -247,7 +264,7 @@ const Cars = () => {
               />
             </div>
 
-            {/* Category */}
+            {/* Vehicle Category Dropdown */}
             <div className="flex-1">
               <label htmlFor="category-filter" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                 Vehicle type
@@ -266,7 +283,7 @@ const Cars = () => {
               </select>
             </div>
 
-            {/* Sort */}
+            {/* Sorting Order Dropdown */}
             <div className="flex-1">
               <label htmlFor="sort-filter" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                 Sort by
@@ -284,9 +301,8 @@ const Cars = () => {
             </div>
           </div>
 
-          {/* Price filters */}
+          {/* Min & Max Price Bounds */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-5 border-t border-zinc-800">
-
             <div>
               <label htmlFor="min-price" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
                 Minimum price (₹/day)
@@ -318,19 +334,20 @@ const Cars = () => {
             </div>
           </div>
 
+          {/* Reset Filters Link */}
           <div className="flex justify-end mt-4">
             <button
               type="button"
               onClick={clearFilters}
               disabled={!hasActiveFilters}
-              className="text-sm font-semibold text-red-400 hover:text-red-300 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+              className="text-sm font-semibold text-red-400 hover:text-red-300 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               Clear all filters
             </button>
           </div>
         </section>
 
-        {/* Search dates received from homepage */}
+        {/* Selected Search Parameters Notification Banner */}
         {(pickupDate || returnDate || featuredCar) && (
           <div className="mb-8 p-4 rounded-2xl bg-red-950/20 border border-red-500/20 flex flex-wrap items-center gap-3 text-xs text-slate-300">
             {featuredCar && (
@@ -353,7 +370,7 @@ const Cars = () => {
           </div>
         )}
 
-        {/* Results heading */}
+        {/* --- Search Results Header --- */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-white">
@@ -368,13 +385,13 @@ const Cars = () => {
 
           <Link
             to="/"
-            className="text-sm text-red-400 hover:text-red-300 font-semibold"
+            className="text-sm text-red-400 hover:text-red-300 font-semibold cursor-pointer"
           >
             ← Back to Home
           </Link>
         </div>
 
-        {/* Car results */}
+        {/* --- Vehicle Grid / Loading / Error States --- */}
         {loading ? (
           <div className="text-center py-16 px-5 rounded-3xl bg-zinc-950/70 border border-zinc-800">
             <div className="text-4xl mb-4 animate-pulse">🚘</div>
@@ -395,7 +412,7 @@ const Cars = () => {
             <button
               type="button"
               onClick={() => fetchCars(city)}
-              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors cursor-pointer"
             >
               Retry
             </button>
@@ -422,7 +439,7 @@ const Cars = () => {
             <button
               type="button"
               onClick={clearFilters}
-              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors cursor-pointer"
             >
               Reset filters
             </button>

@@ -1,6 +1,22 @@
+/**
+ * index.css — Global stylesheet for the Rydely app.
+ *
+ * 1. Imports the "Outfit" Google Font used across the entire UI.
+ * 2. Imports Tailwind CSS (utility-first CSS framework).
+ * 3. Defines custom theme tokens (colors, font) that Tailwind classes can reference.
+ * 4. Sets the default body background, text color, and font.
+ */
+
+/* --- Google Font Import --- */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* --- Tailwind CSS Framework --- */
 @import "tailwindcss";
 
+/* --- Custom Theme Tokens ---
+   These are CSS custom properties that Tailwind's @theme directive registers
+   so we can use them as e.g. `text-primary`, `bg-bg-dark`, etc. in Tailwind classes.
+*/
 @theme {
   --font-sans: 'Outfit', sans-serif;
   --color-primary: #dc2626;
@@ -12,6 +28,9 @@
   --color-subtext: #8a8f98;
 }
 
+/* --- Base Body Styles ---
+   Dark background with subtle red radial gradients to give a cinematic feel.
+*/
 body {
   background-color: #070404;
   background-image: 

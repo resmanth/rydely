@@ -1,14 +1,29 @@
+// ============================================================
+// About.jsx — Company Story & Leadership Team Presentation
+// ------------------------------------------------------------
+// This page presents the Rydely company vision, market mission,
+// key metrics, and the official 4-member leadership team:
+//   1. Aditya Dhanraj Singh — Founder & CEO
+//   2. Suryanshu Tiwari — CTO
+//   3. Gagandeep — Head of Product & Design
+//   4. Resmanth kumar beesetti — Head of Operations & Trust
+//
+// Layout Architecture:
+//   - Hero: Mission statement & problem statement (40M idle cars in India)
+//   - Metrics Strip: 50K+ Community, 15+ Cities, ₹20 Lakh Insurance, 4.95★
+//   - Alternating Leadership Cards: Image on right for odd, on left for even
+//   - 4 Core Pillars: Trust & Verification, Host Empowerment, Frictionless Drive, Bharat Focus
+//   - Registered Headquarters Card: Bengaluru Tech Park address & CIN/DPIIT details
+// ============================================================
+
 import { Link } from 'react-router-dom';
 import member1Img from '../assets/member1.jpeg';
 import member2Img from '../assets/member2.jpeg';
 import member3Img from '../assets/member3.jpeg';
 import member4Img from '../assets/member4.png';
 
-/**
- * Team Members Data
- * Official team member photos loaded directly from assets
- */
-const teamMembers = [
+// Official team members data with bio, tags, social links, and local assets
+const leadershipTeam = [
   {
     id: 1,
     name: 'Aditya Dhanraj Singh',
@@ -67,7 +82,8 @@ const teamMembers = [
   },
 ];
 
-const pillars = [
+// Core company operating pillars
+const companyPillars = [
   {
     icon: '🛡️',
     title: 'Trust & Verification First',
@@ -90,7 +106,8 @@ const pillars = [
   },
 ];
 
-const stats = [
+// Platform achievements summary metrics
+const keyMetrics = [
   { num: '50K+', label: 'Verified Community Members' },
   { num: '15+', label: 'Cities & Airport Hubs' },
   { num: '₹20 Lakh', label: 'Trip Damage Insurance' },
@@ -100,10 +117,9 @@ const stats = [
 const About = () => {
   return (
     <div className="min-h-screen bg-[#070404] text-white font-['Outfit'] pt-24 sm:pt-28 pb-16">
-      
-      {/* ── Hero Section (Single clean header, no duplicate logo) ── */}
+
+      {/* --- Section 1: Hero Statement --- */}
       <section className="relative px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center mb-20">
-        {/* Crimson Ambient Glow */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] pointer-events-none"
           style={{
@@ -125,23 +141,23 @@ const About = () => {
         </div>
       </section>
 
-      {/* ── Key Metrics Strip ── */}
+      {/* --- Section 2: Key Metrics Strip --- */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 bg-zinc-950/80 border border-red-950/60 p-6 sm:p-8 rounded-3xl shadow-xl">
-          {stats.map((s, i) => (
-            <div key={i} className="text-center p-3">
+          {keyMetrics.map((metric, index) => (
+            <div key={index} className="text-center p-3">
               <span className="text-3xl sm:text-4xl font-black text-[#ff3535] drop-shadow-[0_0_15px_rgba(255,53,53,0.35)] block mb-1">
-                {s.num}
+                {metric.num}
               </span>
               <span className="text-xs sm:text-sm text-slate-400 font-semibold uppercase tracking-wider">
-                {s.label}
+                {metric.label}
               </span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── 4 Team Members Section (Alternating Image & Info Layout) ── */}
+      {/* --- Section 3: 4 Leadership Team Members --- */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs font-mono font-bold tracking-widest uppercase text-red-400 bg-red-950/60 border border-red-500/30 px-3.5 py-1 rounded-full">
@@ -157,12 +173,10 @@ const About = () => {
 
         {/* Alternating Members List */}
         <div className="space-y-10 sm:space-y-12">
-          {teamMembers.map((member, index) => {
-            // Alternating layout:
-            // Member 1 (index 0): Image on Right, Info on Left
-            // Member 2 (index 1): Image on Left, Info on Right
-            // Member 3 (index 2): Image on Right, Info on Left
-            // Member 4 (index 3): Image on Left, Info on Right
+          {leadershipTeam.map((member, index) => {
+            // Alternating pattern:
+            // Member 1 & 3: Info on left, Image on right
+            // Member 2 & 4: Image on left, Info on right
             const isImageOnRight = index % 2 === 0;
 
             return (
@@ -170,7 +184,7 @@ const About = () => {
                 key={member.id}
                 className="bg-zinc-950/85 hover:bg-zinc-900/90 border border-red-950/60 hover:border-red-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl transition-all duration-300 relative overflow-hidden group"
               >
-                {/* Decorative Red Accent Beam */}
+                {/* Decorative Red Accent Beam on Hover */}
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 <div
@@ -178,7 +192,7 @@ const About = () => {
                     isImageOnRight ? 'lg:flex-row' : 'lg:flex-row-reverse'
                   } items-center gap-8 lg:gap-12`}
                 >
-                  {/* ── Member Info Column ── */}
+                  {/* Member Bio & Details Column */}
                   <div className="flex-1 space-y-4 text-left">
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-500/30">
@@ -204,9 +218,9 @@ const About = () => {
 
                     {/* Skill/Contribution Tags */}
                     <div className="flex items-center gap-2 flex-wrap pt-1">
-                      {member.tags.map((tag, tIdx) => (
+                      {member.tags.map((tag, tagIndex) => (
                         <span
-                          key={tIdx}
+                          key={tagIndex}
                           className="text-[11px] font-medium text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-lg"
                         >
                           ✓ {tag}
@@ -214,7 +228,7 @@ const About = () => {
                       ))}
                     </div>
 
-                    {/* Social Media Links */}
+                    {/* Professional Social Media Links */}
                     <div className="flex items-center gap-3 pt-2">
                       <a
                         href={member.social.linkedin}
@@ -246,7 +260,7 @@ const About = () => {
                     </div>
                   </div>
 
-                  {/* ── Member Image Column ── */}
+                  {/* Member Photo Portrait Column */}
                   <div className="w-full sm:w-80 lg:w-96 shrink-0 relative">
                     <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden aspect-[4/5] bg-zinc-900 border-2 border-red-950/60 group-hover:border-red-500/60 transition-colors shadow-2xl">
                       <img
@@ -255,10 +269,8 @@ const About = () => {
                         className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
-                      {/* Gradient Vignette over photo base */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                      
-                      {/* Name chip at bottom of image */}
+
                       <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs">
                         <span className="font-bold text-white drop-shadow-md">
                           {member.name.split(' ')[0]}
@@ -276,7 +288,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* ── The Problem & The Mission ── */}
+      {/* --- Section 4: The Market Problem & Rydely Solution --- */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="bg-gradient-to-r from-zinc-950 via-red-950/30 to-zinc-950 border border-red-950/60 rounded-3xl p-8 sm:p-12 shadow-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -313,7 +325,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* ── 4 Core Pillars ── */}
+      {/* --- Section 5: 4 Core Pillars --- */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <span className="text-xs font-mono font-bold tracking-widest uppercase text-red-400">
@@ -325,24 +337,24 @@ const About = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {pillars.map((p, i) => (
+          {companyPillars.map((pillar, index) => (
             <div
-              key={i}
+              key={index}
               className="bg-zinc-950/80 hover:bg-zinc-900/90 border border-red-950/50 hover:border-red-500/40 p-7 rounded-3xl transition-all duration-300 shadow-xl group"
             >
-              <span className="text-3xl mb-4 block">{p.icon}</span>
+              <span className="text-3xl mb-4 block">{pillar.icon}</span>
               <h3 className="text-xl font-bold text-white group-hover:text-red-400 transition-colors mb-2">
-                {p.title}
+                {pillar.title}
               </h3>
               <p className="text-sm text-slate-400 leading-relaxed font-normal">
-                {p.desc}
+                {pillar.desc}
               </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Office & Legal Credibility ── */}
+      {/* --- Section 6: Office & Legal Identity --- */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
         <div className="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>

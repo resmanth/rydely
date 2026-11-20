@@ -1,7 +1,22 @@
+// ============================================================
+// Preloader.jsx — Automotive Supercar Cockpit Loading Screen
+// ------------------------------------------------------------
+// This component renders an automotive digital instrument cluster HUD:
+//   - Circular speedometer needle & neon glow arc (0 to 320 KM/H)
+//   - Dynamic engine tachometer revving from 1,200 to 8,000 RPM
+//   - Perspective 3D cyber grid floor with headlight beam sweeps
+//   - Real-time event listeners:
+//       - 'rydely-3d-progress': reports 3D model parsing status
+//       - 'rydely-3d-ready': triggers ignition & hyperdrive dissolve warp
+//   - Failsafe timer (4.5s) to guarantee the website always opens even
+//     on slow networks or devices without WebGL2.
+// ============================================================
+
 import { useState, useEffect } from 'react';
 import carLogo from '../assets/carlogo.png';
 
 const Preloader = () => {
+  // Loading & cockpit telemetry states
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState(0);
   const [rpm, setRpm] = useState(1000);
@@ -13,7 +28,7 @@ const Preloader = () => {
   useEffect(() => {
     let targetProgress = 18;
 
-    // Smooth physics ticker for speedometer, RPM, and percentage
+    // Smooth physics ticker for speedometer, RPM, and percentage progression
     const ticker = setInterval(() => {
       setProgress((prev) => {
         if (prev < targetProgress) {
@@ -29,6 +44,7 @@ const Preloader = () => {
       });
     }, 35);
 
+    // Custom event dispatched from Global3DCar.jsx while loading BMW 3D assets
     const handleProgress = (e) => {
       const val = e.detail?.progress ?? 0;
       targetProgress = Math.max(targetProgress, val);
@@ -43,6 +59,7 @@ const Preloader = () => {
       }
     };
 
+    // Custom event dispatched when Three.js finishes rendering first frame
     const handleReady = () => {
       targetProgress = 100;
       setProgress(100);
@@ -55,7 +72,7 @@ const Preloader = () => {
     window.addEventListener('rydely-3d-progress', handleProgress);
     window.addEventListener('rydely-3d-ready', handleReady);
 
-    // Failsafe timeout
+    // Failsafe timeout: unlock after 4.5 seconds if 3D model takes too long
     const failsafe = setTimeout(() => {
       handleReady();
     }, 4500);
@@ -81,9 +98,10 @@ const Preloader = () => {
     }
   }, [isReady, progress]);
 
+  // Remove completely from DOM when animation finishes
   if (isDestroyed) return null;
 
-  // Gauge calculations for the dual HUD arcs
+  // Gauge arc stroke offset calculations
   const circumference = 2 * Math.PI * 88;
   const strokeOffset = circumference - (circumference * (progress * 0.75)) / 100;
 
@@ -93,7 +111,7 @@ const Preloader = () => {
         isFading ? 'opacity-0 scale-110 blur-md pointer-events-none' : 'opacity-100 scale-100 blur-0'
       }`}
     >
-      {/* ── Custom Keyframe Animations ── */}
+      {/* --- Keyframe Animation Styles --- */}
       <style>{`
         @keyframes cyberGrid {
           0% { background-position: 0 0; }
@@ -121,9 +139,8 @@ const Preloader = () => {
         }
       `}</style>
 
-      {/* ── Ambient Background Lighting & Cyber Road ── */}
+      {/* --- Ambient Background Lighting & Perspective Grid --- */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Core Electric Horizon Glow */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[450px] rounded-full pointer-events-none"
           style={{
@@ -132,7 +149,7 @@ const Preloader = () => {
           }}
         />
 
-        {/* Perspective Road Grid Floor */}
+        {/* Perspective Road Floor */}
         <div
           className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[160vw] h-[55vh] grid-floor origin-bottom pointer-events-none opacity-40"
           style={{
@@ -142,7 +159,7 @@ const Preloader = () => {
           }}
         />
 
-        {/* Headlight Beam Sweeps */}
+        {/* Headlight Beam Sweep */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[300px] pointer-events-none"
           style={{
@@ -153,7 +170,7 @@ const Preloader = () => {
         />
       </div>
 
-      {/* ── TOP HUD TELEMETRY BAR ── */}
+      {/* --- Top HUD Telemetry Bar --- */}
       <div className="relative z-10 w-full px-6 sm:px-12 pt-8 flex items-center justify-between text-[10px] font-mono tracking-widest text-slate-400">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
@@ -176,15 +193,13 @@ const Preloader = () => {
         </div>
       </div>
 
-      {/* ── CENTER: SUPERCAR DIGITAL COCKPIT & BRAND ── */}
+      {/* --- Center Cockpit HUD Instrument Cluster --- */}
       <div className="relative z-10 flex flex-col items-center justify-center my-auto px-4">
 
-        {/* The Instrument Cluster Ring */}
         <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center mb-6">
-          
-          {/* Outer Calibration Ring */}
+
+          {/* Speedometer Ring */}
           <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
-            {/* Background Track */}
             <circle
               cx="100"
               cy="100"
@@ -196,7 +211,6 @@ const Preloader = () => {
               strokeDashoffset={circumference * 0.25}
               strokeLinecap="round"
             />
-            {/* Speed Gauge Neon Fill */}
             <circle
               cx="100"
               cy="100"
@@ -218,15 +232,13 @@ const Preloader = () => {
             </defs>
           </svg>
 
-          {/* Inner Ticks Pattern */}
+          {/* Internal rotating dashed bezel */}
           <div className="absolute inset-4 rounded-full border border-red-500/10 flex items-center justify-center">
             <div className="w-full h-full rounded-full border-2 border-dashed border-red-500/20 animate-[spin_20s_linear_infinite]" />
           </div>
 
-          {/* Central Speedometer Cluster */}
+          {/* Digital Telemetry Display */}
           <div className="absolute flex flex-col items-center justify-center text-center">
-            
-            {/* Digital Speed Number */}
             <div className="flex items-baseline justify-center">
               <span className="font-['Outfit'] font-black text-6xl sm:text-7xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-red-100 to-red-400 drop-shadow-[0_0_30px_rgba(239,68,68,0.5)]">
                 {speed}
@@ -236,7 +248,6 @@ const Preloader = () => {
               </span>
             </div>
 
-            {/* RPM & Gear Telemetry */}
             <div className="flex items-center gap-3 mt-1 font-mono text-[11px] font-bold">
               <span className="px-2 py-0.5 rounded bg-red-600 text-white shadow-md shadow-red-600/50">
                 GEAR 7
@@ -246,19 +257,17 @@ const Preloader = () => {
               </span>
             </div>
 
-            {/* Real-time Percentage Indicator */}
             <div className="mt-3 flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-red-950/80 border border-red-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
               <span className="font-mono text-[10px] text-red-200 font-extrabold tracking-wider">
                 {Math.round(progress)}% LOADED
               </span>
             </div>
-
           </div>
 
         </div>
 
-        {/* ── Brand Logo ── */}
+        {/* Brand Logo & Laser Scanner */}
         <div className="text-center">
           <div className="inline-block relative">
             <img
@@ -266,8 +275,6 @@ const Preloader = () => {
               alt="Rydely"
               className="h-14 sm:h-16 w-auto object-contain mx-auto brightness-110 drop-shadow-[0_0_30px_rgba(255,53,53,0.55)]"
             />
-
-            {/* Glowing Laser Underline Scan */}
             <div className="relative w-full h-[2px] bg-red-950 mt-3 overflow-hidden rounded-full">
               <div
                 className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_10px_#ef4444]"
@@ -281,7 +288,7 @@ const Preloader = () => {
           </p>
         </div>
 
-        {/* ── Horizontal Segmented HUD Bar ── */}
+        {/* Progress HUD Bar */}
         <div className="w-72 sm:w-96 mt-6">
           <div className="h-1.5 w-full bg-black rounded-full overflow-hidden border border-red-900/40 p-[1px] relative shadow-inner">
             <div
@@ -290,7 +297,6 @@ const Preloader = () => {
             />
           </div>
 
-          {/* Dynamic Stage Console Status */}
           <div className="flex items-center justify-between mt-2.5 text-[10px] font-mono tracking-wider">
             <span className="text-slate-400 flex items-center gap-1.5 truncate">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -304,7 +310,7 @@ const Preloader = () => {
 
       </div>
 
-      {/* ── BOTTOM HUD FOOTER & SPEC CHIPS ── */}
+      {/* --- Bottom Status Footer --- */}
       <div className="relative z-10 w-full px-6 sm:px-12 pb-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] font-mono text-slate-500 tracking-widest border-t border-red-950/40 pt-4">
         <div className="flex items-center gap-4">
           <span>LATENCY: 14MS</span>

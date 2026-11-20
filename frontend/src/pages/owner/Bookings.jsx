@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -26,24 +26,38 @@ const OwnerBookings = () => {
     }
   }, [authLoading, isAuthenticated, isOwner, navigate]);
 
-  const fetchBookings = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await bookingApi.owner();
-      setBookings(res.bookings || []);
-    } catch (err) {
-      setError(err.message || 'Could not load owner bookings');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    if (isAuthenticated && isOwner) {
-      fetchBookings();
+    let isCancelled = false;
+
+    if (!isAuthenticated || !isOwner) {
+      return;
     }
-  }, [isAuthenticated, isOwner, fetchBookings]);
+
+    const loadOwnerBookings = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await bookingApi.owner();
+        if (!isCancelled) {
+          setBookings(res.bookings || []);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(err.message || 'Could not load owner bookings');
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadOwnerBookings();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthenticated, isOwner]);
 
   const handleStatusChange = async (bookingId, status) => {
     setActionLoadingId(bookingId);

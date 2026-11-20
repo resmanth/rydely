@@ -1,4 +1,5 @@
 import CarDetails from './pages/CarDetails';
+import Profile from './pages/Profile';
 import ListYourCar from './pages/ListYourCar';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
@@ -62,20 +63,7 @@ const AppLayout = () => {
             }
           />
           <Route path="/offer-ride" element={<ListYourCar />} />
-          <Route
-            path="/profile"
-            element={
-              <div className="max-w-4xl mx-auto px-4 py-32 text-center font-['Outfit']">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg shadow-red-600/40">
-                  👤
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2">My Profile & Bookings</h1>
-                <p className="text-slate-400 text-sm max-w-md mx-auto">
-                  Manage your active self-drive rentals, identity verification, and listed vehicles.
-                </p>
-              </div>
-            }
-          />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </main>

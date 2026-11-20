@@ -3,24 +3,19 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const CarCard = ({
   id = 'car-1',
-  name = 'Mahindra XUV700 AX7L',
-  category = 'SUV',
+  name = 'Unknown Vehicle',
+  category = '',
   image = '',
-  price = 3499,
+  price = 0,
   priceUnit = '/ day',
-  location = 'Mumbai · Bandra West',
-  rating = 4.95,
-  tripsCount = 38,
-  hostName = 'Verified Host',
-  isSuperhost = true,
-  specs = [
-    { label: 'Transmission', val: 'Automatic' },
-    { label: 'Fuel', val: 'Diesel Turbo' },
-    { label: 'Seats', val: '7 Seater' },
-    { label: 'Free KMs', val: '300 km/day' },
-  ],
-  features = ['FASTag Enabled', 'Sunroof', 'Doorstep Delivery'],
-  badge = '',
+  location = '',
+  rating,
+  tripsCount,
+  hostName,
+  isSuperhost,
+  specs = [],
+  features = [],
+  badge,
   isAvailable = true,
   onBookNow,
 }) => {
@@ -48,6 +43,11 @@ const CarCard = ({
     ? specs
     : Object.entries(specs || {}).map(([label, val]) => ({ label, val }));
 
+  const showRating = rating !== undefined && rating !== null;
+  const showTrips = tripsCount !== undefined && tripsCount !== null;
+  const showHost = hostName !== undefined && hostName !== null;
+  const showBadge = badge !== undefined && badge !== null && badge !== '';
+
   return (
     <div className="group relative bg-zinc-950/85 hover:bg-zinc-900/95 backdrop-blur-xl border border-red-950/50 hover:border-red-500/50 rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-xl hover:shadow-[0_20px_40px_rgba(220,38,38,0.18)] hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden text-white font-['Outfit'] select-none">
 
@@ -60,7 +60,7 @@ const CarCard = ({
             <span className="truncate">{location}</span>
           </span>
 
-          {badge ? (
+          {showBadge ? (
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-white px-2.5 py-0.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 shadow-sm shadow-red-600/40">
               {badge}
             </span>
@@ -68,11 +68,11 @@ const CarCard = ({
             <span className="text-[10px] font-bold text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full">
               ★ Superhost
             </span>
-          ) : (
+          ) : category ? (
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               {category}
             </span>
-          )}
+          ) : null}
         </div>
 
         <div className="relative w-full h-36 sm:h-44 flex items-center justify-center my-2 overflow-hidden rounded-2xl bg-gradient-to-b from-white/5 to-transparent">
@@ -102,31 +102,39 @@ const CarCard = ({
               <h3 className="text-lg sm:text-xl font-extrabold text-white group-hover:text-red-400 transition-colors leading-tight line-clamp-1">
                 {name}
               </h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Hosted by <span className="text-slate-300 font-semibold">{hostName}</span>
-              </p>
+              {showHost && (
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Hosted by <span className="text-slate-300 font-semibold">{hostName}</span>
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center gap-1 bg-zinc-900/80 px-2 py-1 rounded-lg border border-zinc-800 shrink-0">
-              <span className="text-amber-400 text-xs">★</span>
-              <span className="text-xs font-bold text-white">{rating}</span>
-              <span className="text-[10px] text-slate-500">({tripsCount})</span>
-            </div>
+            {showRating && (
+              <div className="flex items-center gap-1 bg-zinc-900/80 px-2 py-1 rounded-lg border border-zinc-800 shrink-0">
+                <span className="text-amber-400 text-xs">★</span>
+                <span className="text-xs font-bold text-white">{rating}</span>
+                {showTrips && (
+                  <span className="text-[10px] text-slate-500">({tripsCount})</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 py-2.5 border-y border-zinc-800/70 mb-3 text-left">
-          {normalizedSpecs.slice(0, 4).map((s, i) => (
-            <div key={i} className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl px-2.5 py-1.5">
-              <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">
-                {s.label}
-              </span>
-              <span className="text-xs font-bold text-white truncate block">
-                {s.val}
-              </span>
-            </div>
-          ))}
-        </div>
+        {normalizedSpecs.length > 0 && (
+          <div className="grid grid-cols-2 gap-2 py-2.5 border-y border-zinc-800/70 mb-3 text-left">
+            {normalizedSpecs.slice(0, 4).map((s, i) => (
+              <div key={i} className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl px-2.5 py-1.5">
+                <span className="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">
+                  {s.label}
+                </span>
+                <span className="text-xs font-bold text-white truncate block">
+                  {s.val}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {features && features.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap mb-4">

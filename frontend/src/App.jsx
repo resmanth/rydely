@@ -1,8 +1,12 @@
 import CarDetails from './pages/CarDetails';
 import Profile from './pages/Profile';
 import ListYourCar from './pages/ListYourCar';
+import OwnerDashboard from './pages/owner/Dashboard';
+import OwnerCars from './pages/owner/Cars';
+import OwnerBookings from './pages/owner/Bookings';
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import Navbar from './components/Navbar';
@@ -63,6 +67,9 @@ const AppLayout = () => {
             }
           />
           <Route path="/offer-ride" element={<ListYourCar />} />
+          <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+          <Route path="/owner/cars" element={<OwnerCars />} />
+          <Route path="/owner/bookings" element={<OwnerBookings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
         </Routes>
@@ -104,6 +111,17 @@ const App = () => {
     <Router>
       <AuthProvider>
         <AppLayout />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            style: {
+              background: '#1a1a1a',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.1)',
+              fontSize: '14px',
+            },
+          }}
+        />
       </AuthProvider>
     </Router>
   );

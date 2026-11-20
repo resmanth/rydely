@@ -156,7 +156,7 @@ const FeaturedVehicles = () => {
                 </div>
 
                 <Link
-                  to={`/vehicles?car=${encodeURIComponent(car.title)}`}
+                  to={`/cars?car=${encodeURIComponent(car.title)}`}
                   className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all shadow-md hover:shadow-red-500/25 cursor-pointer"
                 >
                   <span>Rent This Car</span>
@@ -229,7 +229,7 @@ const FeaturedVehicles = () => {
                 </div>
 
                 <Link
-                  to={`/vehicles?car=${encodeURIComponent(car.title)}`}
+                  to={`/cars?car=${encodeURIComponent(car.title)}`}
                   className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-all shadow-md hover:shadow-red-500/25 cursor-pointer"
                 >
                   <span>Rent This Car</span>
@@ -244,7 +244,7 @@ const FeaturedVehicles = () => {
         {/* Explore All Rental Cars Action */}
         <div className="mt-14 text-center">
           <Link
-            to="/vehicles"
+            to="/cars"
             className="inline-flex items-center gap-2 px-8 py-3.5 bg-red-950/60 hover:bg-red-600 text-white border border-red-500/40 hover:border-red-400 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg shadow-red-950/50 active:scale-95"
           >
             <span>Browse All Cars Available for Rent</span>

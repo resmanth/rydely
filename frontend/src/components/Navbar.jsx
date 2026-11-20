@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import carLogo from '../assets/carlogo.png';
 
-const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
+const Navbar = () => {
+  const { isAuthenticated, logout, user, isOwner } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +30,11 @@ const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header
@@ -105,6 +113,16 @@ const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
               <span>INR (₹)</span>
             </div>
 
+            {/* Owner HQ Button */}
+            {isOwner && (
+              <Link
+                to="/owner/dashboard"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900/60 border border-red-500/40 text-xs font-bold text-red-300 transition-all cursor-pointer shadow-sm shadow-red-950/40"
+              >
+                <span>⚡ Host HQ</span>
+              </Link>
+            )}
+
             {/* Profile Button */}
             <Link
               to="/profile"
@@ -116,13 +134,13 @@ const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <span className="group-hover:text-red-400 transition-colors">Profile</span>
+              <span className="group-hover:text-red-400 transition-colors">{isAuthenticated && user?.name ? user.name.split(' ')[0] : 'Profile'}</span>
             </Link>
 
             {isAuthenticated ? (
               <button
                 type="button"
-                onClick={onAuthClick}
+                onClick={handleLogout}
                 className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white border border-white/30 rounded-xl hover:bg-white/10 transition-all cursor-pointer"
               >
                 Logout
@@ -158,12 +176,22 @@ const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
                 </svg>
               </div>
             </Link>
-            <Link
-              to="/login"
-              className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg shadow-md shadow-red-600/30"
-            >
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-3 py-1.5 text-xs font-bold text-white border border-white/30 rounded-lg hover:bg-white/10"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg shadow-md shadow-red-600/30"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
         </div>
@@ -190,6 +218,16 @@ const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
               <span>My Profile</span>
             </Link>
 
+            {isOwner && (
+              <Link
+                to="/owner/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-lg text-sm font-bold text-red-300 bg-red-950/30 border border-red-500/30 flex items-center gap-2"
+              >
+                <span>⚡ Host HQ Dashboard</span>
+              </Link>
+            )}
+
             {[...leftNavLinks, ...rightNavLinks].map((link) => (
               <Link
                 key={link.name}
@@ -207,20 +245,32 @@ const Navbar = ({ isAuthenticated = false, onAuthClick }) => {
           </nav>
 
           <div className="pt-3 border-t border-white/10 flex items-center gap-3">
-            <Link
-              to="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center py-2.5 text-sm font-semibold text-white border border-white/20 rounded-xl hover:bg-white/10"
-            >
-              Log In
-            </Link>
-            <Link
-              to="/login?mode=signup"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-600/30"
-            >
-              Sign Up
-            </Link>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                className="flex-1 text-center py-2.5 text-sm font-semibold text-white border border-white/20 rounded-xl hover:bg-white/10"
+              >
+                Log Out
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 text-center py-2.5 text-sm font-semibold text-white border border-white/20 rounded-xl hover:bg-white/10"
+                >
+                  Log In
+                </Link>
+                <Link
+                  to="/login?mode=signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 text-center py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-600/30"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

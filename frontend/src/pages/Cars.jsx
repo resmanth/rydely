@@ -1,10 +1,19 @@
-import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import CarCard from '../components/CarCard';
-import { sampleCars } from '../data/cars';
+import { carsApi } from '../services/api';
+import { mapCar } from '../services/carMapper';
+import { matchCity, allCityValues } from '../data/cities';
+
+const getDateOffset = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
 
 const Cars = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Read the search information passed from the homepage.
   const urlCity = searchParams.get('city') || '';
@@ -13,20 +22,12 @@ const Cars = () => {
   const pickupTime = searchParams.get('pickupTime') || '';
   const returnDate = searchParams.get('returnDate') || '';
   const returnTime = searchParams.get('returnTime') || '';
-  const deliveryRequested = searchParams.get('delivery') === 'true';
   const urlMinPrice = searchParams.get('minPrice') || '';
   const urlMaxPrice = searchParams.get('maxPrice') || '';
   const urlSortBy = searchParams.get('sortBy') || 'recommended';
-  const urlInstantOnly =
-    searchParams.get('instant') === 'true' ||
-    urlCategory.toLowerCase() === 'instant';
 
   // Featured vehicle links use ?car=vehicle-name.
-  const featuredCar =
-    searchParams.get('car') ||
-    searchParams.get('carName') ||
-    '';
-
+  const featuredCar = searchParams.get('car') || searchParams.get('carName') || '';
   const featuredCarId = searchParams.get('carId') || '';
 
   // Local filter state.
@@ -35,8 +36,11 @@ const Cars = () => {
   const [minPrice, setMinPrice] = useState(urlMinPrice);
   const [maxPrice, setMaxPrice] = useState(urlMaxPrice);
   const [sortBy, setSortBy] = useState(urlSortBy);
-  const [instantOnly, setInstantOnly] = useState(urlInstantOnly);
-  const [deliveryOnly, setDeliveryOnly] = useState(deliveryRequested);
+
+  // API data state
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // Keep the filter state in sync if the URL changes.
   const [prevUrlCity, setPrevUrlCity] = useState(urlCity);
@@ -44,69 +48,113 @@ const Cars = () => {
   const [prevUrlMin, setPrevUrlMin] = useState(urlMinPrice);
   const [prevUrlMax, setPrevUrlMax] = useState(urlMaxPrice);
   const [prevUrlSort, setPrevUrlSort] = useState(urlSortBy);
-  const [prevUrlInst, setPrevUrlInst] = useState(urlInstantOnly);
-  const [prevDel, setPrevDel] = useState(deliveryRequested);
 
   if (
     prevUrlCity !== urlCity ||
     prevUrlCat !== urlCategory ||
     prevUrlMin !== urlMinPrice ||
     prevUrlMax !== urlMaxPrice ||
-    prevUrlSort !== urlSortBy ||
-    prevUrlInst !== urlInstantOnly ||
-    prevDel !== deliveryRequested
+    prevUrlSort !== urlSortBy
   ) {
     setPrevUrlCity(urlCity);
     setPrevUrlCat(urlCategory);
     setPrevUrlMin(urlMinPrice);
     setPrevUrlMax(urlMaxPrice);
     setPrevUrlSort(urlSortBy);
-    setPrevUrlInst(urlInstantOnly);
-    setPrevDel(deliveryRequested);
 
     setCity(urlCity);
     setCategory(urlCategory.toLowerCase());
     setMinPrice(urlMinPrice);
     setMaxPrice(urlMaxPrice);
     setSortBy(urlSortBy);
-    setInstantOnly(urlInstantOnly);
-    setDeliveryOnly(deliveryRequested);
   }
 
-  const filteredCars = useMemo(() => {
-    let result = [...sampleCars];
+  // Build ISO dates for the API
+  const pickupISO = pickupDate
+    ? `${pickupDate}T${pickupTime || '10:00'}`
+    : `${getDateOffset(1)}T10:00`;
+  const returnISO = returnDate
+    ? `${returnDate}T${returnTime || '18:00'}`
+    : `${getDateOffset(2)}T18:00`;
 
-    // City filter.
-    if (city.trim()) {
-      result = result.filter((car) =>
-        car.location.toLowerCase().includes(city.trim().toLowerCase())
-      );
+  // Debounce ref
+  const debounceRef = useRef(null);
+
+  // Fetch cars from API
+  const fetchCars = useCallback(async (cityText) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const matched = matchCity(cityText);
+
+      let allCars = [];
+
+      if (matched) {
+        // Exact city match → one API call
+        const data = await carsApi.checkAvailability({
+          location: matched,
+          pickupDate: pickupISO,
+          returnDate: returnISO,
+        });
+        allCars = (data.availableCars || []).map(mapCar);
+      } else if (!cityText || !cityText.trim()) {
+        // Empty city → fetch all cities in parallel
+        const cities = allCityValues();
+        const results = await Promise.allSettled(
+          cities.map((c) =>
+            carsApi.checkAvailability({
+              location: c,
+              pickupDate: pickupISO,
+              returnDate: returnISO,
+            })
+          )
+        );
+        for (const r of results) {
+          if (r.status === 'fulfilled' && r.value.availableCars) {
+            allCars.push(...r.value.availableCars.map(mapCar));
+          }
+        }
+      }
+      // else: non-empty text with no city match → allCars stays []
+
+      setCars(allCars);
+    } catch (err) {
+      setError(err.message || 'Failed to load vehicles');
+      setCars([]);
+    } finally {
+      setLoading(false);
     }
+  }, [pickupISO, returnISO]);
+
+  // Fetch on mount and when city/dates change (debounced for city typing)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchCars(city);
+    }, 400);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [city, pickupISO, returnISO, fetchCars]);
+
+  // Client-side filters on the fetched + mapped data
+  const filteredCars = useMemo(() => {
+    let result = [...cars];
 
     // Vehicle category filter.
     if (category !== 'all' && category !== 'instant') {
       result = result.filter(
-        (car) => car.category.toLowerCase() === category
+        (car) => car.category?.toLowerCase() === category
       );
-    }
-
-    // Instant booking filter.
-    if (category === 'instant' || instantOnly) {
-      result = result.filter((car) => car.instantBooking);
     }
 
     // Price filters.
     if (minPrice !== '') {
       result = result.filter((car) => car.price >= Number(minPrice));
     }
-
     if (maxPrice !== '') {
       result = result.filter((car) => car.price <= Number(maxPrice));
-    }
-
-    // Doorstep delivery filter.
-    if (deliveryOnly) {
-      result = result.filter((car) => car.doorstepDelivery);
     }
 
     // Featured car selection.
@@ -123,22 +171,10 @@ const Cars = () => {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-high') {
       result.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'rating') {
-      result.sort((a, b) => b.rating - a.rating);
     }
 
     return result;
-  }, [
-    city,
-    category,
-    minPrice,
-    maxPrice,
-    sortBy,
-    instantOnly,
-    deliveryOnly,
-    featuredCar,
-    featuredCarId,
-  ]);
+  }, [cars, category, minPrice, maxPrice, sortBy, featuredCar, featuredCarId]);
 
   const clearFilters = () => {
     setCity('');
@@ -146,19 +182,11 @@ const Cars = () => {
     setMinPrice('');
     setMaxPrice('');
     setSortBy('recommended');
-    setInstantOnly(false);
-    setDeliveryOnly(false);
 
     setSearchParams((params) => {
-      [
-        'city',
-        'category',
-        'delivery',
-        'car',
-        'carName',
-        'carId',
-      ].forEach((key) => params.delete(key));
-
+      ['city', 'category', 'delivery', 'car', 'carName', 'carId'].forEach(
+        (key) => params.delete(key)
+      );
       return params;
     });
   };
@@ -168,10 +196,18 @@ const Cars = () => {
     category !== 'all' ||
     minPrice !== '' ||
     maxPrice !== '' ||
-    instantOnly ||
-    deliveryOnly ||
     featuredCar !== '' ||
     featuredCarId !== '';
+
+  // Navigate to details with car data in state + sessionStorage
+  const handleCardNav = (car) => {
+    try {
+      sessionStorage.setItem(`rydely-car-${car.id}`, JSON.stringify(car));
+    } catch { /* ignore quota errors */ }
+    navigate(`/cars/${encodeURIComponent(car.id)}${window.location.search}`, {
+      state: { car },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#070404] text-white font-['Outfit'] pt-24 sm:pt-28 pb-20">
@@ -219,10 +255,7 @@ const Cars = () => {
               <select
                 id="category-filter"
                 value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setInstantOnly(e.target.value === 'instant');
-                }}
+                onChange={(e) => setCategory(e.target.value)}
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-red-500"
               >
                 <option value="all">All vehicles</option>
@@ -230,7 +263,6 @@ const Cars = () => {
                 <option value="mpv">MPV</option>
                 <option value="4x4">4x4</option>
                 <option value="luxury">Luxury</option>
-                <option value="instant">Instant booking</option>
               </select>
             </div>
 
@@ -248,13 +280,12 @@ const Cars = () => {
                 <option value="recommended">Recommended</option>
                 <option value="price-low">Price: Low to high</option>
                 <option value="price-high">Price: High to low</option>
-                <option value="rating">Highest rated</option>
               </select>
             </div>
           </div>
 
-          {/* Price and additional filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 pt-5 border-t border-zinc-800">
+          {/* Price filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-5 border-t border-zinc-800">
 
             <div>
               <label htmlFor="min-price" className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
@@ -285,33 +316,6 @@ const Cars = () => {
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-red-500"
               />
             </div>
-
-            <label className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={instantOnly}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setInstantOnly(checked);
-
-                  if (!checked && category === 'instant') {
-                    setCategory('all');
-                  }
-                }}
-                className="accent-red-500 w-4 h-4"
-              />
-              <span className="text-sm text-slate-300">Instant booking only</span>
-            </label>
-
-            <label className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={deliveryOnly}
-                onChange={(e) => setDeliveryOnly(e.target.checked)}
-                className="accent-red-500 w-4 h-4"
-              />
-              <span className="text-sm text-slate-300">Doorstep delivery</span>
-            </label>
           </div>
 
           <div className="flex justify-end mt-4">
@@ -346,10 +350,6 @@ const Cars = () => {
                 Return: <strong className="text-white">{returnDate} {returnTime}</strong>
               </span>
             )}
-
-            <span className="text-slate-500">
-              Dates are carried from your search; live availability will be connected to the backend.
-            </span>
           </div>
         )}
 
@@ -360,7 +360,9 @@ const Cars = () => {
               Available vehicles
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              {filteredCars.length} {filteredCars.length === 1 ? 'vehicle' : 'vehicles'} found
+              {loading
+                ? 'Searching...'
+                : `${filteredCars.length} ${filteredCars.length === 1 ? 'vehicle' : 'vehicles'} found`}
             </p>
           </div>
 
@@ -373,10 +375,39 @@ const Cars = () => {
         </div>
 
         {/* Car results */}
-        {filteredCars.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-16 px-5 rounded-3xl bg-zinc-950/70 border border-zinc-800">
+            <div className="text-4xl mb-4 animate-pulse">🚘</div>
+            <h3 className="text-xl font-bold text-white mb-2">
+              Loading vehicles...
+            </h3>
+            <p className="text-sm text-slate-400 max-w-md mx-auto">
+              Checking availability across cities. This may take a moment.
+            </p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16 px-5 rounded-3xl bg-zinc-950/70 border border-red-500/20">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h3 className="text-xl font-bold text-white mb-2">
+              Something went wrong
+            </h3>
+            <p className="text-sm text-red-300 max-w-md mx-auto mb-6">{error}</p>
+            <button
+              type="button"
+              onClick={() => fetchCars(city)}
+              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        ) : filteredCars.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredCars.map((car) => (
-              <CarCard key={car.id} {...car} />
+              <CarCard
+                key={car.id}
+                {...car}
+                onBookNow={() => handleCardNav(car)}
+              />
             ))}
           </div>
         ) : (
